@@ -1,12 +1,12 @@
 package org.openqa.utils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.openqa.services.SauceLabServiceImpl;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 
 public class SauceLabServiceHardcodedResponses extends SauceLabServiceImpl {
 

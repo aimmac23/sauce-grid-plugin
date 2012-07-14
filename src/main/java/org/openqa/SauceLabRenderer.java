@@ -1,14 +1,12 @@
 package org.openqa;
 
-import java.util.List;
-import java.util.Map;
-
-import org.openqa.grid.internal.TestSession;
 import org.openqa.grid.internal.TestSlot;
 import org.openqa.grid.internal.utils.HtmlRenderer;
 import org.openqa.grid.web.utils.BrowserNameUtils;
-import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+
+import java.util.List;
+import java.util.Map;
 
 public class SauceLabRenderer implements HtmlRenderer {
 
@@ -61,10 +59,13 @@ public class SauceLabRenderer implements HtmlRenderer {
 
       int used = 0;
       for (int j = 0; j < i + max; j++) {
-        TestSlot slo = slots.get(j);
-        if (slo.getSession() != null) {
-          used++;
-        }
+          if (j >= slots.size()) {
+              break;
+          }
+          TestSlot slo = slots.get(j);
+          if (slo.getSession() != null) {
+              used++;
+          }
       }
       if (used != 0) {
         builder.append("(running : " + used + ")");

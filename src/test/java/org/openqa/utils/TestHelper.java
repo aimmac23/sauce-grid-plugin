@@ -1,14 +1,14 @@
 package org.openqa.utils;
 
-import java.net.URL;
-import java.util.Arrays;
-
 import org.openqa.grid.common.GridRole;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.utils.GridHubConfiguration;
 import org.openqa.grid.internal.utils.SelfRegisteringRemote;
 import org.openqa.grid.web.Hub;
 import org.openqa.selenium.net.PortProber;
+
+import java.net.URL;
+import java.util.Arrays;
 
 public class TestHelper {
 
@@ -17,7 +17,7 @@ public class TestHelper {
     // because auto discovery takes ages.
     config.setHost("localhost");
     config.setPort(port);
-    config.setServlets(Arrays.asList(new String[] {"org.openqa.SauceLabAdminServlet"}));
+    config.setServlets(Arrays.asList(org.openqa.SauceLabAdminServlet.class.getName()));
     Hub hub = new Hub(config);
     hub.start();
     return hub;
