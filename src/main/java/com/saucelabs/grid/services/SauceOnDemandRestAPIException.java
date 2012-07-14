@@ -1,4 +1,4 @@
-package org.openqa.services;
+package com.saucelabs.grid.services;
 
 /**
  * @author François Reynaud - Initial version of plugin

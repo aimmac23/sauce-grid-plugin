@@ -1,6 +1,6 @@
-package org.openqa.services;
+package com.saucelabs.grid.services;
 
-import org.openqa.SauceOnDemandCapabilities;
+import com.saucelabs.grid.SauceOnDemandCapabilities;
 
 import java.util.List;
 

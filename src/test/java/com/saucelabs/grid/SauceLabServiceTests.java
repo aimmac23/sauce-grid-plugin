@@ -1,11 +1,12 @@
-package org.openqa;
+package com.saucelabs.grid;
 
 import java.util.List;
 
-import org.openqa.services.SauceOnDemandRestAPIException;
-import org.openqa.services.SauceOnDemandService;
-import org.openqa.services.SauceOnDemandServiceImpl;
-import org.openqa.utils.SauceLabServiceHardcodedResponses;
+import com.saucelabs.grid.SauceOnDemandCapabilities;
+import com.saucelabs.grid.services.SauceOnDemandRestAPIException;
+import com.saucelabs.grid.services.SauceOnDemandService;
+import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
+import com.saucelabs.grid.utils.SauceLabServiceHardcodedResponses;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

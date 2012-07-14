@@ -1,6 +1,6 @@
-package org.openqa.utils;
+package com.saucelabs.grid.utils;
 
-import org.openqa.SauceOnDemandAdminServlet;
+import com.saucelabs.grid.SauceOnDemandAdminServlet;
 import org.openqa.grid.common.GridRole;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.utils.GridHubConfiguration;

@@ -1,4 +1,4 @@
-package org.openqa;
+package com.saucelabs.grid;
 
 import java.io.IOException;
 import java.io.InputStream;

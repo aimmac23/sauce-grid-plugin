@@ -1,7 +1,8 @@
-package org.openqa;
+package com.saucelabs.grid;
 
 import java.net.URL;
 
+import com.saucelabs.grid.SauceOnDemandRemoteProxy;
 import org.openqa.grid.common.GridRole;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.utils.SelfRegisteringRemote;
@@ -9,7 +10,7 @@ import org.openqa.grid.web.Hub;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.utils.TestHelper;
+import com.saucelabs.grid.utils.TestHelper;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;

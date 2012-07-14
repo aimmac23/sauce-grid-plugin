@@ -1,8 +1,8 @@
-package org.openqa.utils;
+package com.saucelabs.grid.utils;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
-import org.openqa.services.SauceOnDemandServiceImpl;
+import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
 
 import java.io.IOException;
 import java.io.InputStream;

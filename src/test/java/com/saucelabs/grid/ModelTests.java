@@ -1,5 +1,6 @@
-package org.openqa;
+package com.saucelabs.grid;
 
+import com.saucelabs.grid.SauceOnDemandCapabilities;
 import org.json.JSONException;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.Assert;

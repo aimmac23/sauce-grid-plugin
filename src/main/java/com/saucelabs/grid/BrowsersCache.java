@@ -1,4 +1,4 @@
-package org.openqa;
+package com.saucelabs.grid;
 
 import java.util.Collection;
 import java.util.HashMap;

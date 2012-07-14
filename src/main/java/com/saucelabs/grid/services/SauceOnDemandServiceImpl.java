@@ -1,4 +1,4 @@
-package org.openqa.services;
+package com.saucelabs.grid.services;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -8,8 +8,8 @@ import org.apache.http.message.BasicHttpRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openqa.Helper;
-import org.openqa.SauceOnDemandCapabilities;
+import com.saucelabs.grid.Helper;
+import com.saucelabs.grid.SauceOnDemandCapabilities;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -1,10 +1,11 @@
-package org.openqa;
+package com.saucelabs.grid;
 
+import com.saucelabs.grid.SauceOnDemandRemoteProxy;
 import org.openqa.grid.common.GridRole;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.utils.SelfRegisteringRemote;
 import org.openqa.grid.web.Hub;
-import org.openqa.utils.TestHelper;
+import com.saucelabs.grid.utils.TestHelper;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

@@ -1,4 +1,4 @@
-package org.openqa;
+package com.saucelabs.grid;
 
 import org.openqa.grid.internal.TestSlot;
 import org.openqa.grid.internal.utils.HtmlRenderer;

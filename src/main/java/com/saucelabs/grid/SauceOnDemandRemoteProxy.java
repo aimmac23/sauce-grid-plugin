@@ -1,4 +1,4 @@
-package org.openqa;
+package com.saucelabs.grid;
 
 import org.json.JSONException;
 import org.openqa.grid.common.RegistrationRequest;

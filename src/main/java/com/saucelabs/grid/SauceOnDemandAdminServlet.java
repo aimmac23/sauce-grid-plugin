@@ -1,4 +1,4 @@
-package org.openqa;
+package com.saucelabs.grid;
 
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.common.SeleniumProtocol;
@@ -6,9 +6,9 @@ import org.openqa.grid.internal.Registry;
 import org.openqa.grid.internal.TestSlot;
 import org.openqa.grid.web.servlet.RegistryBasedServlet;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.services.SauceOnDemandRestAPIException;
-import org.openqa.services.SauceOnDemandService;
-import org.openqa.services.SauceOnDemandServiceImpl;
+import com.saucelabs.grid.services.SauceOnDemandRestAPIException;
+import com.saucelabs.grid.services.SauceOnDemandService;
+import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
