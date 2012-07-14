@@ -105,12 +105,10 @@ public class SauceOnDemandAdminServlet extends RegistryBasedServlet {
             sauceRequest.getCapabilities().add(c);
         }
 
+        //write selected browsers/auth details to sauce-ondemand.json
+        proxy.writeConfigurationToFile();
         SauceOnDemandRemoteProxy newProxy = new SauceOnDemandRemoteProxy(sauceRequest, getRegistry());
         getRegistry().add(newProxy);
-
-        //todo write selected browsers/auth details to sauce-ondemand.json
-
-
     }
 
 

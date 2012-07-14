@@ -1,6 +1,8 @@
 package com.saucelabs.grid;
 
 import org.json.JSONException;
+import org.json.JSONObject;
+import org.openqa.grid.common.JSONConfigurationUtils;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.Registry;
 import org.openqa.grid.internal.RemoteProxy;
@@ -9,6 +11,9 @@ import org.openqa.grid.internal.TestSlot;
 import org.openqa.grid.internal.utils.HtmlRenderer;
 import org.openqa.grid.selenium.proxy.DefaultRemoteProxy;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -18,28 +23,50 @@ import java.util.Map;
 public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     public static String SAUCE_END_POINT = "http://ondemand.saucelabs.com:80/wd/hub";
+    public static final String SAUCE_ONDEMAND_CONFIG_FILE = "sauce-ondemand.json";
+    public static final String SAUCE_USER_NAME = "sauceUserName";
+    public static final String SAUCE_ACCESS_KEY = "sauceAccessKey";
     private volatile boolean markUp = false;
 
     private String userName;
     private String accessKey;
     public static final String SAUCE_ONE = "sauce";
-    private boolean isSLOne = false;
+    private boolean shouldProxySauceOnDemand = false;
 
-    public boolean isTheSauceLabProxy() {
-        return isSLOne;
+    public boolean shouldProxySauceOnDemand() {
+        return shouldProxySauceOnDemand;
     }
 
     public SauceOnDemandRemoteProxy(RegistrationRequest req, Registry registry) {
         super(req, registry);
+        //read configuration from sauce-ondemand.json
+        JSONObject sauceConfiguration = readConfigurationFromFile();
+        try {
+            if (sauceConfiguration != null) {
+                this.userName = sauceConfiguration.getString(SAUCE_USER_NAME);
+                this.accessKey = sauceConfiguration.getString(SAUCE_ACCESS_KEY);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         Object b = req.getConfiguration().get(SAUCE_ONE);
         if (b != null) {
-            isSLOne = Boolean.valueOf(b.toString());
+            shouldProxySauceOnDemand = Boolean.valueOf(b.toString());
         }
+    }
+
+    private JSONObject readConfigurationFromFile() {
+
+        File file = new File(SAUCE_ONDEMAND_CONFIG_FILE);
+        if (file.exists()) {
+            return JSONConfigurationUtils.loadJSON(file.getName());
+        }
+        return null;
     }
 
     @Override
     public TestSession getNewSession(Map<String, Object> requestedCapability) {
-        if ((isSLOne && markUp) || !isSLOne) {
+        if ((shouldProxySauceOnDemand && markUp) || !shouldProxySauceOnDemand) {
             return super.getNewSession(requestedCapability);
         } else {
             return null;
@@ -58,10 +85,10 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         } else {
             SauceOnDemandRemoteProxy other = (SauceOnDemandRemoteProxy) o;
 
-            if (this.isSLOne) {
+            if (this.shouldProxySauceOnDemand) {
                 System.out.println("return -1, sslone");
                 return 1;
-            } else if (other.isSLOne) {
+            } else if (other.shouldProxySauceOnDemand) {
                 return -1;
             } else {
                 int i = super.compareTo(o);
@@ -104,5 +131,24 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     public void setAccessKey(String accessKey) {
         this.accessKey = accessKey;
+    }
+
+    public void writeConfigurationToFile() {
+        JSONObject jsonObject = new JSONObject();
+
+        try {
+            jsonObject.put(SAUCE_USER_NAME, getUserName());
+            jsonObject.put(SAUCE_ACCESS_KEY, getAccessKey());
+            //TODO handle selected browsers
+            FileWriter file = new FileWriter(SAUCE_ONDEMAND_CONFIG_FILE);
+            file.write(jsonObject.toString());
+            file.flush();
+            file.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

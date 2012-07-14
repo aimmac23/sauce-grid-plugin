@@ -24,7 +24,7 @@ public class SauceOnDemandRenderer implements HtmlRenderer {
     builder.append("<legend>").append(proxy.getClass().getSimpleName()).append("</legend>");
     builder.append("listening on ").append(proxy.getRemoteHost());
 
-    if (proxy.isTheSauceLabProxy()) {
+    if (proxy.shouldProxySauceOnDemand()) {
       builder.append("<br/> I'm the sauce lab one!<br/> ");
       builder.append("<br/> I'm ");
       if (proxy.isMarkUp()) {
