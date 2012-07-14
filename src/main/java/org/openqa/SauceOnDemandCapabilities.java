@@ -10,7 +10,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SauceLabCapabilities {
+/**
+ * @author François Reynaud - Initial version of plugin
+ * @author Ross Rowe - Additional functionalitye
+ */
+public class SauceOnDemandCapabilities {
 
     public static final String NAME = "selenium_name";
     public static final String SHORT_VERSION = "short_version";
@@ -23,13 +27,13 @@ public class SauceLabCapabilities {
     private final JSONObject rawJSON;
     private final String md5;
 
-    public SauceLabCapabilities(String raw) throws JSONException {
+    public SauceOnDemandCapabilities(String raw) throws JSONException {
         this.rawJSON = new JSONObject(raw);
         init();
         md5 = init();
     }
 
-    public SauceLabCapabilities(Map<String, ?> from) throws JSONException {
+    public SauceOnDemandCapabilities(Map<String, ?> from) throws JSONException {
         DesiredCapabilities c = new DesiredCapabilities(from);
         this.rawJSON = new JSONObject(c.asMap());
         md5 = init();
@@ -48,7 +52,7 @@ public class SauceLabCapabilities {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
-        SauceLabCapabilities other = (SauceLabCapabilities) obj;
+        SauceOnDemandCapabilities other = (SauceOnDemandCapabilities) obj;
         if (md5 == null) {
             if (other.md5 != null) return false;
         } else if (!md5.equals(other.md5)) return false;

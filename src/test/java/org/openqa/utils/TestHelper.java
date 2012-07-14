@@ -1,5 +1,6 @@
 package org.openqa.utils;
 
+import org.openqa.SauceOnDemandAdminServlet;
 import org.openqa.grid.common.GridRole;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.utils.GridHubConfiguration;
@@ -17,7 +18,7 @@ public class TestHelper {
     // because auto discovery takes ages.
     config.setHost("localhost");
     config.setPort(port);
-    config.setServlets(Arrays.asList(org.openqa.SauceLabAdminServlet.class.getName()));
+    config.setServlets(Arrays.asList(SauceOnDemandAdminServlet.class.getName()));
     Hub hub = new Hub(config);
     hub.start();
     return hub;

@@ -11,7 +11,11 @@ import org.openqa.grid.selenium.proxy.DefaultRemoteProxy;
 
 import java.util.Map;
 
-public class SauceLabRemoteProxy extends DefaultRemoteProxy {
+/**
+ * @author François Reynaud - Initial version of plugin
+ * @author Ross Rowe - Additional functionality
+ */
+public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     public static String SAUCE_END_POINT = "http://ondemand.saucelabs.com:80/wd/hub";
     private volatile boolean markUp = false;
@@ -25,7 +29,7 @@ public class SauceLabRemoteProxy extends DefaultRemoteProxy {
         return isSLOne;
     }
 
-    public SauceLabRemoteProxy(RegistrationRequest req, Registry registry) {
+    public SauceOnDemandRemoteProxy(RegistrationRequest req, Registry registry) {
         super(req, registry);
         Object b = req.getConfiguration().get(SAUCE_ONE);
         if (b != null) {
@@ -44,15 +48,15 @@ public class SauceLabRemoteProxy extends DefaultRemoteProxy {
 
     @Override
     public HtmlRenderer getHtmlRender() {
-        return new SauceLabRenderer(this);
+        return new SauceOnDemandRenderer(this);
     }
 
     @Override
     public int compareTo(RemoteProxy o) {
-        if (!(o instanceof SauceLabRemoteProxy)) {
+        if (!(o instanceof SauceOnDemandRemoteProxy)) {
             throw new RuntimeException("cannot mix saucelab and not saucelab ones");
         } else {
-            SauceLabRemoteProxy other = (SauceLabRemoteProxy) o;
+            SauceOnDemandRemoteProxy other = (SauceOnDemandRemoteProxy) o;
 
             if (this.isSLOne) {
                 System.out.println("return -1, sslone");
@@ -67,9 +71,9 @@ public class SauceLabRemoteProxy extends DefaultRemoteProxy {
         }
     }
 
-    public boolean contains(SauceLabCapabilities capabilities) throws JSONException {
+    public boolean contains(SauceOnDemandCapabilities capabilities) throws JSONException {
         for (TestSlot slot : getTestSlots()) {
-            SauceLabCapabilities slc = new SauceLabCapabilities(slot.getCapabilities());
+            SauceOnDemandCapabilities slc = new SauceOnDemandCapabilities(slot.getCapabilities());
             if (slc.equals(capabilities)) {
                 return true;
             }

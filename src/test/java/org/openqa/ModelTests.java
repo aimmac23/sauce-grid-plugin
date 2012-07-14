@@ -31,24 +31,24 @@ public class ModelTests {
 
   @Test
   public void sauceLabCapability() throws JSONException {
-    SauceLabCapabilities slc = new SauceLabCapabilities(stringCapabilities);
+    SauceOnDemandCapabilities slc = new SauceOnDemandCapabilities(stringCapabilities);
     Assert.assertEquals(slc.getLongName(), "Internet Explorer");
     Assert.assertEquals(slc.getLongVersion(), "9.0.8112.16421.");
   }
 
   @Test
   public void sauceLabCapabilityConvert() throws JSONException {
-    SauceLabCapabilities slc = new SauceLabCapabilities(stringCapabilities);
+    SauceOnDemandCapabilities slc = new SauceOnDemandCapabilities(stringCapabilities);
     DesiredCapabilities d = new DesiredCapabilities(slc.asMap());
 
-    SauceLabCapabilities slc2 = new SauceLabCapabilities(d.asMap());
+    SauceOnDemandCapabilities slc2 = new SauceOnDemandCapabilities(d.asMap());
     Assert.assertEquals(slc.getMD5(), slc2.getMD5());
   }
   
   @Test
   public void orderDoesntImpactMD5() throws JSONException {
-    SauceLabCapabilities slc = new SauceLabCapabilities(stringCapabilities);
-    SauceLabCapabilities slc2 = new SauceLabCapabilities(stringCapabilities2);
+    SauceOnDemandCapabilities slc = new SauceOnDemandCapabilities(stringCapabilities);
+    SauceOnDemandCapabilities slc2 = new SauceOnDemandCapabilities(stringCapabilities2);
   
     Assert.assertEquals(slc.getMD5(), slc2.getMD5());
   }
@@ -57,7 +57,7 @@ public class ModelTests {
 
   @Test(expectedExceptions = {JSONException.class})
   public void sauceLabCapabilityInvalid() throws JSONException {
-    new SauceLabCapabilities(stringCapabilitiesInvalid);
+    new SauceOnDemandCapabilities(stringCapabilitiesInvalid);
   }
 
 }

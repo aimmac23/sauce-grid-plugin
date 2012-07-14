@@ -8,16 +8,13 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import java.util.List;
 import java.util.Map;
 
-public class SauceLabRenderer implements HtmlRenderer {
+public class SauceOnDemandRenderer implements HtmlRenderer {
 
-  private SauceLabRemoteProxy proxy;
+  private SauceOnDemandRemoteProxy proxy;
 
+  public SauceOnDemandRenderer() {}
 
-  public SauceLabRenderer() {}
-
-
-
-  public SauceLabRenderer(SauceLabRemoteProxy proxy) {
+  public SauceOnDemandRenderer(SauceOnDemandRemoteProxy proxy) {
     this.proxy = proxy;
   }
 
@@ -55,7 +52,7 @@ public class SauceLabRenderer implements HtmlRenderer {
     int max = proxy.getMaxNumberOfConcurrentTestSessions();
     for (int i = 0; i < slots.size(); i += max) {
       TestSlot slot = slots.get(i);
-      builder.append("<li>" + slot.getCapabilities().get(SauceLabCapabilities.NAME));
+      builder.append("<li>" + slot.getCapabilities().get(SauceOnDemandCapabilities.NAME));
 
       int used = 0;
       for (int j = 0; j < i + max; j++) {

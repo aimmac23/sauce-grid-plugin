@@ -1,15 +1,12 @@
 package org.openqa;
 
 import java.net.URL;
-import java.util.Arrays;
 
 import org.openqa.grid.common.GridRole;
 import org.openqa.grid.common.RegistrationRequest;
-import org.openqa.grid.internal.utils.GridHubConfiguration;
 import org.openqa.grid.internal.utils.SelfRegisteringRemote;
 import org.openqa.grid.web.Hub;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.net.PortProber;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.utils.TestHelper;
@@ -19,7 +16,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 @Test(groups={"slow"})
-public class SauceLabRemoteProxyTest {
+public class SauceOnDemandRemoteProxyTest {
   private Hub hub;
 
 
@@ -49,7 +46,7 @@ public class SauceLabRemoteProxyTest {
     remote.getConfiguration().put(RegistrationRequest.TIME_OUT, -1);
     remote.getConfiguration()
         .put(RegistrationRequest.PROXY_CLASS, "org.openqa.SauceLabRemoteProxy");
-    remote.getConfiguration().put(SauceLabRemoteProxy.SAUCE_ONE, true);
+    remote.getConfiguration().put(SauceOnDemandRemoteProxy.SAUCE_ONE, true);
     System.out.println(remote.getConfiguration());
     remote.sendRegistrationRequest();
 

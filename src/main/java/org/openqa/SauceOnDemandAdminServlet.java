@@ -6,9 +6,9 @@ import org.openqa.grid.internal.Registry;
 import org.openqa.grid.internal.TestSlot;
 import org.openqa.grid.web.servlet.RegistryBasedServlet;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.services.SauceLabRestAPIException;
-import org.openqa.services.SauceLabService;
-import org.openqa.services.SauceLabServiceImpl;
+import org.openqa.services.SauceOnDemandRestAPIException;
+import org.openqa.services.SauceOnDemandService;
+import org.openqa.services.SauceOnDemandServiceImpl;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -17,20 +17,24 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SauceLabAdminServlet extends RegistryBasedServlet {
+/**
+ * @author François Reynaud - Initial version of plugin
+ * @author Ross Rowe - Additional functionality
+ */
+public class SauceOnDemandAdminServlet extends RegistryBasedServlet {
 
     private static final String UPDATE_BROWSERS = "updateSupportedBrowsers";
-    private SauceLabService service = new SauceLabServiceImpl();
+    private SauceOnDemandService service = new SauceOnDemandServiceImpl();
     private final BrowsersCache browsers;
     private static final String SAUCE_USER_NAME = "sauceUserName";
     private static final String SAUCE_ACCESS_KEY = "sauceAccessKey";
 
-    public SauceLabAdminServlet() throws SauceLabRestAPIException {
+    public SauceOnDemandAdminServlet() throws SauceOnDemandRestAPIException {
         this(null);
     }
 
 
-    public SauceLabAdminServlet(Registry registry) throws SauceLabRestAPIException {
+    public SauceOnDemandAdminServlet(Registry registry) throws SauceOnDemandRestAPIException {
         super(registry);
         browsers = new BrowsersCache(service.getBrowsers());
         //todo read selected browsers/auth details from sauce-ondemand.json
@@ -41,7 +45,7 @@ public class SauceLabAdminServlet extends RegistryBasedServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
             IOException {
         String id = req.getParameter("id");
-        SauceLabRemoteProxy p = getProxy(id);
+        SauceOnDemandRemoteProxy p = getProxy(id);
         if (req.getPathInfo().endsWith(UPDATE_BROWSERS)) {
             updateBrowsers(req, resp, p);
             resp.sendRedirect("/grid/console");
@@ -53,7 +57,7 @@ public class SauceLabAdminServlet extends RegistryBasedServlet {
             IOException {
 
         String id = req.getParameter("id");
-        SauceLabRemoteProxy p = getProxy(id);
+        SauceOnDemandRemoteProxy p = getProxy(id);
 
         if (req.getPathInfo().endsWith("/admin")) {
             String page = renderAdminPage(p);
@@ -73,9 +77,9 @@ public class SauceLabAdminServlet extends RegistryBasedServlet {
     }
 
     private void updateBrowsers(HttpServletRequest req, HttpServletResponse resp,
-                                SauceLabRemoteProxy proxy) {
+                                SauceOnDemandRemoteProxy proxy) {
         String[] supported = req.getParameterValues("supportedCapabilities");
-        List<SauceLabCapabilities> caps = new ArrayList<SauceLabCapabilities>();
+        List<SauceOnDemandCapabilities> caps = new ArrayList<SauceOnDemandCapabilities>();
         if (supported != null) {
             for (String md5 : supported) {
                 caps.add(browsers.get(md5));
@@ -93,7 +97,7 @@ public class SauceLabAdminServlet extends RegistryBasedServlet {
         int m = Integer.parseInt(max);
 
         sauceRequest.getConfiguration().put(RegistrationRequest.MAX_SESSION, m);
-        for (SauceLabCapabilities cap : caps) {
+        for (SauceOnDemandCapabilities cap : caps) {
             DesiredCapabilities c = new DesiredCapabilities(cap.asMap());
             c.setCapability(RegistrationRequest.MAX_INSTANCES, m);
             c.setCapability("user-name", userName);
@@ -101,7 +105,7 @@ public class SauceLabAdminServlet extends RegistryBasedServlet {
             sauceRequest.getCapabilities().add(c);
         }
 
-        SauceLabRemoteProxy newProxy = new SauceLabRemoteProxy(sauceRequest, getRegistry());
+        SauceOnDemandRemoteProxy newProxy = new SauceOnDemandRemoteProxy(sauceRequest, getRegistry());
         getRegistry().add(newProxy);
 
         //todo write selected browsers/auth details to sauce-ondemand.json
@@ -110,21 +114,21 @@ public class SauceLabAdminServlet extends RegistryBasedServlet {
     }
 
 
-    private List<TestSlot> createSlots(SauceLabRemoteProxy proxy, SauceLabCapabilities cap) {
+    private List<TestSlot> createSlots(SauceOnDemandRemoteProxy proxy, SauceOnDemandCapabilities cap) {
         List<TestSlot> slots = new ArrayList<TestSlot>();
         for (int i = 0; i < proxy.getMaxNumberOfConcurrentTestSessions(); i++) {
             slots.add(new TestSlot(proxy, SeleniumProtocol.WebDriver,
-                    SauceLabRemoteProxy.SAUCE_END_POINT, cap.asMap()));
+                    SauceOnDemandRemoteProxy.SAUCE_END_POINT, cap.asMap()));
         }
         return slots;
     }
 
 
-    private SauceLabRemoteProxy getProxy(String id) {
-        return (SauceLabRemoteProxy) getRegistry().getProxyById(id);
+    private SauceOnDemandRemoteProxy getProxy(String id) {
+        return (SauceOnDemandRemoteProxy) getRegistry().getProxyById(id);
     }
 
-    private String renderAdminPage(SauceLabRemoteProxy p) {
+    private String renderAdminPage(SauceOnDemandRemoteProxy p) {
 
         StringBuilder b = new StringBuilder();
 
@@ -147,7 +151,7 @@ public class SauceLabAdminServlet extends RegistryBasedServlet {
                     + p.getAccessKey() + "' />");
 
             b.append("<ul>");
-            for (SauceLabCapabilities cap : browsers.getAllBrowsers()) {
+            for (SauceOnDemandCapabilities cap : browsers.getAllBrowsers()) {
 
                 b.append("<li>");
                 b.append("<input type='checkbox' name='supportedCapabilities'");

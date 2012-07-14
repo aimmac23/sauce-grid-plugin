@@ -2,13 +2,13 @@ package org.openqa.utils;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
-import org.openqa.services.SauceLabServiceImpl;
+import org.openqa.services.SauceOnDemandServiceImpl;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 
-public class SauceLabServiceHardcodedResponses extends SauceLabServiceImpl {
+public class SauceLabServiceHardcodedResponses extends SauceOnDemandServiceImpl {
 
   private String statusRepsonse;
   private String browsersResponse;

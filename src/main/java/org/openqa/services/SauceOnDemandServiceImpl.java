@@ -1,9 +1,5 @@
 package org.openqa.services;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -13,9 +9,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openqa.Helper;
-import org.openqa.SauceLabCapabilities;
+import org.openqa.SauceOnDemandCapabilities;
 
-public class SauceLabServiceImpl implements SauceLabService {
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @author François Reynaud - Initial version of plugin
+ * @author Ross Rowe - Additional functionality
+ */
+public class SauceOnDemandServiceImpl implements SauceOnDemandService {
 
   private final String host = "saucelabs.com";
   private final HttpHost h = new HttpHost(host);
@@ -23,34 +27,34 @@ public class SauceLabServiceImpl implements SauceLabService {
   public final String BROWSERS = "http://" + host + "/rest/v1/info/browsers";
 
 
-  public SauceLabServiceImpl() {
+  public SauceOnDemandServiceImpl() {
 
   }
 
-  public boolean isSauceLabUp() throws SauceLabRestAPIException {
+  public boolean isSauceLabUp() throws SauceOnDemandRestAPIException {
     String s="none";
     try {
       s = executeCommand(STATUS);
       JSONObject result = new JSONObject(s);
       return result.getBoolean("up");
     } catch (Exception e) {
-      throw new SauceLabRestAPIException("raw response:"+s,e);
+      throw new SauceOnDemandRestAPIException("raw response:"+s,e);
     }
   }
 
-  public List<SauceLabCapabilities> getBrowsers() throws SauceLabRestAPIException {
-    List<SauceLabCapabilities> res = new ArrayList<SauceLabCapabilities>();
+  public List<SauceOnDemandCapabilities> getBrowsers() throws SauceOnDemandRestAPIException {
+    List<SauceOnDemandCapabilities> res = new ArrayList<SauceOnDemandCapabilities>();
     String s="none";
     try {
       s = executeCommand(BROWSERS);
       JSONArray results = new JSONArray(s);
       for (int i = 0; i < results.length(); i++) {
         JSONObject cap = results.getJSONObject(i);
-        res.add(new SauceLabCapabilities(cap.toString()));
+        res.add(new SauceOnDemandCapabilities(cap.toString()));
       }
       return res;
     } catch (Exception e) {
-      throw new SauceLabRestAPIException("raw response:"+s,e);
+      throw new SauceOnDemandRestAPIException("raw response:"+s,e);
     }
   }
 
