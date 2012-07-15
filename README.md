@@ -4,8 +4,8 @@ To integrate the Sauce plugin to a grid instance, perform the following steps:
 
 1. Run your hub instance by using the following arguments:
 
-    -role hub -servlets org.openqa.SauceLabAdminServlet
+    -role hub -servlets com.saucelabs.grid.SauceOnDemandAdminServlet
 
 2. Run your Sauce OnDemand Node instance by using the following arguments:
 
-   -role wd -proxy org.openqa.SauceLabRemoteProxy -hubHost localhost -sauce true
+   -role wd -proxy com.saucelabs.grid.SauceOnDemandRemoteProxy -hubHost localhost -sauce true

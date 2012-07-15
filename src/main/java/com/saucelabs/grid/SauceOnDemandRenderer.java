@@ -28,14 +28,14 @@ public class SauceOnDemandRenderer implements HtmlRenderer {
       builder.append("<br/> I'm the sauce lab one!<br/> ");
       builder.append("<br/> I'm ");
       if (proxy.isMarkUp()) {
-        builder.append("up <a href='/grid/admin/SauceLabAdminServlet/test?state=down&id="
+        builder.append("up <a href='/grid/admin/SauceOnDemandAdminServlet/test?state=down&id="
             + proxy.getId() + "'>mark down</a> ");
       } else {
-        builder.append("down <a href='/grid/admin/SauceLabAdminServlet/test?state=up&id="
+        builder.append("down <a href='/grid/admin/SauceOnDemandAdminServlet/test?state=up&id="
             + proxy.getId() + "'>mark up</a> ");
       }
     }
-    builder.append("<a href='/grid/admin/SauceLabAdminServlet/admin?id=" + proxy.getId()
+    builder.append("<a href='/grid/admin/SauceOnDemandAdminServlet/admin?id=" + proxy.getId()
         + "' >admin</a></br>");
 
     builder.append("<br />");

@@ -1,14 +1,14 @@
 package com.saucelabs.grid;
 
+import com.saucelabs.grid.services.SauceOnDemandRestAPIException;
+import com.saucelabs.grid.services.SauceOnDemandService;
+import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.common.SeleniumProtocol;
 import org.openqa.grid.internal.Registry;
 import org.openqa.grid.internal.TestSlot;
 import org.openqa.grid.web.servlet.RegistryBasedServlet;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import com.saucelabs.grid.services.SauceOnDemandRestAPIException;
-import com.saucelabs.grid.services.SauceOnDemandService;
-import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +37,6 @@ public class SauceOnDemandAdminServlet extends RegistryBasedServlet {
     public SauceOnDemandAdminServlet(Registry registry) throws SauceOnDemandRestAPIException {
         super(registry);
         browsers = new BrowsersCache(service.getBrowsers());
-        //todo read selected browsers/auth details from sauce-ondemand.json
     }
 
 
@@ -60,7 +59,11 @@ public class SauceOnDemandAdminServlet extends RegistryBasedServlet {
         SauceOnDemandRemoteProxy p = getProxy(id);
 
         if (req.getPathInfo().endsWith("/admin")) {
+
+//            RequestDispatcher view = req.getRequestDispatcher("/jsp/sauceAdmin.jsp");
+//            view.forward(req, resp);
             String page = renderAdminPage(p);
+
             resp.getWriter().print(page);
             resp.getWriter().close();
             return;
@@ -106,6 +109,8 @@ public class SauceOnDemandAdminServlet extends RegistryBasedServlet {
         }
 
         //write selected browsers/auth details to sauce-ondemand.json
+        proxy.setUserName(userName);
+        proxy.setAccessKey(accessKey);
         proxy.writeConfigurationToFile();
         SauceOnDemandRemoteProxy newProxy = new SauceOnDemandRemoteProxy(sauceRequest, getRegistry());
         getRegistry().add(newProxy);
@@ -133,7 +138,7 @@ public class SauceOnDemandAdminServlet extends RegistryBasedServlet {
         try {
             b.append("<html>");
 
-            b.append("<form action='/grid/admin/SauceLabAdminServlet/" + UPDATE_BROWSERS
+            b.append("<form action='/grid/admin/SauceOnDemandAdminServlet/" + UPDATE_BROWSERS
                     + "' method='POST'>");
 
             b.append("max sessions in parallel on sauce : <input type='text' name='"
