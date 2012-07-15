@@ -14,7 +14,7 @@ import java.util.Map;
  * @author François Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionalitye
  */
-public class SauceOnDemandCapabilities {
+public class SauceOnDemandCapabilities implements Comparable {
 
     public static final String NAME = "selenium_name";
     public static final String SHORT_VERSION = "short_version";
@@ -29,14 +29,13 @@ public class SauceOnDemandCapabilities {
 
     public SauceOnDemandCapabilities(String raw) throws JSONException {
         this.rawJSON = new JSONObject(raw);
-        init();
-        md5 = init();
+        this.md5 = init();
     }
 
     public SauceOnDemandCapabilities(Map<String, ?> from) throws JSONException {
         DesiredCapabilities c = new DesiredCapabilities(from);
         this.rawJSON = new JSONObject(c.asMap());
-        md5 = init();
+        this.md5 = init();
     }
 
     @Override
@@ -98,7 +97,7 @@ public class SauceOnDemandCapabilities {
 
     @Override
     public String toString() {
-        return getName() + " " + getShortVersion() + " on " + getOs();
+        return getOs() + " " + getLongName() + " " + getLongVersion();
     }
 
 
@@ -143,5 +142,15 @@ public class SauceOnDemandCapabilities {
 
     public String getMD5() {
         return md5;
+    }
+
+    public int compareTo(Object o) {
+        if (!(o instanceof SauceOnDemandCapabilities)) {
+            throw new RuntimeException("cannot mix saucelab and not saucelab ones");
+        } else {
+            SauceOnDemandCapabilities other = (SauceOnDemandCapabilities) o;
+
+            return toString().compareTo(other.toString());
+        }
     }
 }

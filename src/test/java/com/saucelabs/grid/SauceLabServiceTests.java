@@ -2,7 +2,6 @@ package com.saucelabs.grid;
 
 import java.util.List;
 
-import com.saucelabs.grid.SauceOnDemandCapabilities;
 import com.saucelabs.grid.services.SauceOnDemandRestAPIException;
 import com.saucelabs.grid.services.SauceOnDemandService;
 import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
@@ -24,7 +23,7 @@ public class SauceLabServiceTests {
 
   @Test(groups = {"manual"})
   public void testBrowsersAgainstSauceLab() throws SauceOnDemandRestAPIException {
-    List<SauceOnDemandCapabilities> caps = realOne.getBrowsers();
+    List<SauceOnDemandCapabilities> caps = realOne.getWebDriverBrowsers();
     Assert.assertTrue(caps.size() > 50);
   }
 
@@ -37,7 +36,7 @@ public class SauceLabServiceTests {
 
   @Test
   public void testBrowsers() throws SauceOnDemandRestAPIException {
-    List<SauceOnDemandCapabilities> caps = mockOne.getBrowsers();
+    List<SauceOnDemandCapabilities> caps = mockOne.getWebDriverBrowsers();
     Assert.assertEquals(caps.size(), 112);
     SauceOnDemandCapabilities first = caps.get(0);
     Assert.assertEquals(first.getName(), "iehta");

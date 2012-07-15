@@ -1,9 +1,6 @@
 package com.saucelabs.grid;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author François Reynaud - Initial version of plugin
@@ -30,7 +27,10 @@ public class BrowsersCache {
   }
   
   public Collection<SauceOnDemandCapabilities> getAllBrowsers(){
-    return map.values();
+      ArrayList<SauceOnDemandCapabilities> list = new ArrayList<SauceOnDemandCapabilities>();
+      list.addAll(map.values());
+      Collections.sort(list);
+      return list;
   }
 
 }

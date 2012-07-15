@@ -11,6 +11,7 @@ import java.util.List;
 public interface SauceOnDemandService {
 
   boolean isSauceLabUp() throws SauceOnDemandRestAPIException;
-  List<SauceOnDemandCapabilities> getBrowsers() throws SauceOnDemandRestAPIException;
-    
+  List<SauceOnDemandCapabilities> getWebDriverBrowsers() throws SauceOnDemandRestAPIException;
+  List<SauceOnDemandCapabilities> getSeleniumBrowsers() throws SauceOnDemandRestAPIException;
+
 }

@@ -24,8 +24,10 @@ import java.util.List;
 public class SauceOnDemandAdminServlet extends RegistryBasedServlet {
 
     private static final String UPDATE_BROWSERS = "updateSupportedBrowsers";
+    public static final String WEB_DRIVER_CAPABILITIES = "webDriverCapabilities";
     private SauceOnDemandService service = new SauceOnDemandServiceImpl();
-    private final BrowsersCache browsers;
+    private final BrowsersCache webDriverBrowsers;
+    private final BrowsersCache seleniumBrowsers;
     private static final String SAUCE_USER_NAME = "sauceUserName";
     private static final String SAUCE_ACCESS_KEY = "sauceAccessKey";
 
@@ -36,7 +38,8 @@ public class SauceOnDemandAdminServlet extends RegistryBasedServlet {
 
     public SauceOnDemandAdminServlet(Registry registry) throws SauceOnDemandRestAPIException {
         super(registry);
-        browsers = new BrowsersCache(service.getBrowsers());
+        webDriverBrowsers = new BrowsersCache(service.getWebDriverBrowsers());
+        seleniumBrowsers = new BrowsersCache(service.getWebDriverBrowsers());
     }
 
 
@@ -81,11 +84,11 @@ public class SauceOnDemandAdminServlet extends RegistryBasedServlet {
 
     private void updateBrowsers(HttpServletRequest req, HttpServletResponse resp,
                                 SauceOnDemandRemoteProxy proxy) {
-        String[] supported = req.getParameterValues("supportedCapabilities");
+        String[] supported = req.getParameterValues(WEB_DRIVER_CAPABILITIES);
         List<SauceOnDemandCapabilities> caps = new ArrayList<SauceOnDemandCapabilities>();
         if (supported != null) {
             for (String md5 : supported) {
-                caps.add(browsers.get(md5));
+                caps.add(webDriverBrowsers.get(md5));
             }
         }
         getRegistry().removeIfPresent(proxy);
@@ -138,37 +141,44 @@ public class SauceOnDemandAdminServlet extends RegistryBasedServlet {
         try {
             b.append("<html>");
 
-            b.append("<form action='/grid/admin/SauceOnDemandAdminServlet/" + UPDATE_BROWSERS
-                    + "' method='POST'>");
+            b.append("<form action='/grid/admin/SauceOnDemandAdminServlet/").append(UPDATE_BROWSERS).append("' method='POST'>");
+            b.append("<fieldset>");
+            b.append("<legend accesskey=c>Sauce OnDemand Configuration</legend>");
+            b.append("<label for=\"maxSessions\">Max parallel sessions</label> : <input type='text' name='").
+                    append(RegistrationRequest.MAX_SESSION).
+                    append("' id='").append(RegistrationRequest.MAX_SESSION).
+                    append("' value='").append(p.getMaxNumberOfConcurrentTestSessions()).
+                    append("' />");
 
-            b.append("max sessions in parallel on sauce : <input type='text' name='"
-                    + RegistrationRequest.MAX_SESSION + "' value='"
-                    + p.getMaxNumberOfConcurrentTestSessions() + "' />");
+            b.append("<label for='").append(SAUCE_USER_NAME).append("'>User Name</label> : <input type='text' name='").
+                    append(SAUCE_USER_NAME).
+                    append("' id='").append(SAUCE_USER_NAME).
+                    append("' value='").append(p.getUserName()).
+                    append("' />");
 
-            b.append("User Name : <input type='text' name='"
-                    + SAUCE_USER_NAME + "' value='"
-                    + p.getUserName() + "' />");
+            b.append("<label for='").append(SAUCE_ACCESS_KEY).append("'>Access Key</label> : <input type='text' name='").
+                    append(SAUCE_ACCESS_KEY).append("' id='").append(SAUCE_ACCESS_KEY).
+                    append("' size=20 value='").append(p.getAccessKey()).append("' />");
+            b.append("</fieldset>");
 
-            b.append("Access Key : <input type='text' name='"
-                    + SAUCE_ACCESS_KEY + "' value='"
-                    + p.getAccessKey() + "' />");
-
+            b.append("<fieldset>");
+            b.append("<legend accesskey=c>Sauce OnDemand Browsers (WebDriver)</legend>");
             b.append("<ul>");
-            for (SauceOnDemandCapabilities cap : browsers.getAllBrowsers()) {
+            for (SauceOnDemandCapabilities cap : webDriverBrowsers.getAllBrowsers()) {
 
                 b.append("<li>");
-                b.append("<input type='checkbox' name='supportedCapabilities'");
+                b.append("<input type='checkbox' name='").append(WEB_DRIVER_CAPABILITIES).append("'");
                 if (p.contains(cap)) {
                     b.append(" checked='checked' ");
                 }
-                b.append("value='" + cap.getMD5() + "'>");
+                b.append("value='").append(cap.getMD5()).append("'>");
                 b.append(cap);
                 b.append("</input>");
                 b.append("</li>");
             }
             b.append("</ul>");
-
-            b.append("<input type='hidden' name='id' value='" + p.getId() + "' />");
+            b.append("</fieldset>");
+            b.append("<input type='hidden' name='id' value='").append(p.getId()).append("' />");
             b.append("<input type='submit' value='save' />");
 
             b.append("</form>");
