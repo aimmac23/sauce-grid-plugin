@@ -7,6 +7,8 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -150,7 +152,23 @@ public class SauceOnDemandCapabilities implements Comparable {
         } else {
             SauceOnDemandCapabilities other = (SauceOnDemandCapabilities) o;
 
-            return toString().compareTo(other.toString());
+            int compare = getOs().compareTo(other.getOs());
+            if (compare != 0) {
+                return compare;
+            }
+            compare = getLongName().compareTo(other.getLongName());
+            if (compare != 0) {
+                return 0;
+            }
+            DecimalFormat d = new DecimalFormat("0.0");
+            try {
+                Number shortVersion = d.parse(getShortVersion());
+                Number otherShortVersion = d.parse(other.getShortVersion());
+                return new Integer(shortVersion.intValue()).compareTo(new Integer(otherShortVersion.intValue()));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
+        return 0;
     }
 }
