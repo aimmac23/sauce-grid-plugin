@@ -30,15 +30,19 @@ public class SauceOnDemandServiceImpl implements SauceOnDemandService {
 
 
     public SauceOnDemandServiceImpl() {
-
     }
 
+    /**
+     * TODO does this work?
+     * @return
+     * @throws SauceOnDemandRestAPIException
+     */
     public boolean isSauceLabUp() throws SauceOnDemandRestAPIException {
         String s = "none";
         try {
             s = executeCommand(STATUS);
             JSONObject result = new JSONObject(s);
-            return result.getBoolean("up");
+            return result.getBoolean("service_operational");
         } catch (Exception e) {
             throw new SauceOnDemandRestAPIException("raw response:" + s, e);
         }

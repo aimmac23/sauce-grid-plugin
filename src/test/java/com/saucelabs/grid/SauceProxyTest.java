@@ -38,7 +38,9 @@ public class SauceProxyTest {
         capabillities.setCapability("username", "rossco_9_9");
         capabillities.setCapability("access-key", "44f0744c-1689-4418-af63-560303cbb37b");
         capabillities.setCapability("sauceKey", "44f0744c-1689-4418-af63-560303cbb37b");
+        capabillities.setCapability("webdriver.logging.profiler.enabled", "true");
         this.driver = new RemoteWebDriver(
+//                new URL("http://rossco_9_9:44f0744c-1689-4418-af63-560303cbb37b@ondemand.saucelabs.com:80/wd/hub"),
                 new URL("http://localhost:4444/wd/hub"),
                 capabillities);
     }

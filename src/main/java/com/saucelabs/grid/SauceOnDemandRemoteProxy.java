@@ -1,5 +1,8 @@
 package com.saucelabs.grid;
 
+import com.saucelabs.grid.services.SauceOnDemandRestAPIException;
+import com.saucelabs.grid.services.SauceOnDemandService;
+import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openqa.grid.common.JSONConfigurationUtils;
@@ -13,6 +16,8 @@ import org.openqa.grid.internal.utils.HtmlRenderer;
 import org.openqa.grid.selenium.proxy.DefaultRemoteProxy;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -44,6 +49,8 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     private static final String SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES = "sauceHandleUnspecifiedCapabilities";
     private CapabilityMatcher capabilityHelper;
 
+    private SauceOnDemandService service = new SauceOnDemandServiceImpl();
+
     public boolean shouldProxySauceOnDemand() {
         return shouldProxySauceOnDemand;
     }
@@ -53,6 +60,9 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
         //read configuration from sauce-ondemand.json
         //TODO include proxy id in json file
+
+        //TODO run unauth Sauce REST API call to verify if Sauce is up?
+
         JSONObject sauceConfiguration = readConfigurationFromFile();
         try {
             if (sauceConfiguration != null) {
@@ -98,7 +108,6 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     }
 
     /**
-     *
      * @param requestedCapability
      * @return
      */
@@ -108,7 +117,15 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         //if no proxy can handle requested capability, and shouldHandleUnspecifiedCapabilities is set to true
         //(and the browser capabillitiy is supported by Sauce), create new desired capability that runs
         //against sauce
-
+        try {
+            this.markUp = service.isSauceLabUp();
+            if (!markUp) {
+                //log an error message?
+            }
+        } catch (SauceOnDemandRestAPIException e) {
+            //error contacting sauce
+            e.printStackTrace();
+        }
         if ((shouldProxySauceOnDemand && markUp) || !shouldProxySauceOnDemand) {
             return super.getNewSession(requestedCapability);
         } else {
@@ -218,12 +235,17 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     public URL getRemoteHost() {
         if (shouldHandleUnspecifiedCapabilities()) {
             try {
-                return new URL("http://ondemand.saucelabs.com:80");
-//                return new URL("http://" + userName + ":" + accessKey + "@ondemand.saucelabs.com:80");
+//                return new URL("http://ondemand.saucelabs.com:80");
+                return new URL("http://" + userName + ":" + accessKey + "@ondemand.saucelabs.com:80");
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
         }
         return remoteHost;
-      }
+    }
+
+    public void beforeCommand(TestSession session, HttpServletRequest request, HttpServletResponse response) {
+        session.put("lastCommand", request.getMethod() + " - " + request.getPathInfo() + " executed.");
+
+    }
 }
