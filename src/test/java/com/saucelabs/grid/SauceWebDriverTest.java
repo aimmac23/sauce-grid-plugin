@@ -15,7 +15,7 @@ import static junit.framework.Assert.assertEquals;
 /**
  * @author Ross Rowe
  */
-public class SauceProxyTest {
+public class SauceWebDriverTest {
 
     private WebDriver driver;
 
@@ -34,14 +34,13 @@ public class SauceProxyTest {
         DesiredCapabilities capabillities = DesiredCapabilities.firefox();
         capabillities.setCapability("version", "12");
         capabillities.setCapability("platform", Platform.XP);
-        capabillities.setCapability("sauceUser", "rossco_9_9");
-        capabillities.setCapability("username", "rossco_9_9");
-        capabillities.setCapability("access-key", "44f0744c-1689-4418-af63-560303cbb37b");
-        capabillities.setCapability("sauceKey", "44f0744c-1689-4418-af63-560303cbb37b");
+//        capabillities.setCapability("username", "rossco_9_9");
+//        capabillities.setCapability("accessKey", "44f0744c-1689-4418-af63-560303cbb37b");
         capabillities.setCapability("webdriver.logging.profiler.enabled", "true");
         this.driver = new RemoteWebDriver(
 //                new URL("http://rossco_9_9:44f0744c-1689-4418-af63-560303cbb37b@ondemand.saucelabs.com:80/wd/hub"),
                 new URL("http://localhost:4444/wd/hub"),
+//                new URL("http://ondemand.saucelabs.com:80/wd/hub"),
                 capabillities);
     }
 

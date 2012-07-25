@@ -2,6 +2,7 @@ package com.saucelabs.grid.services;
 
 import com.saucelabs.grid.Helper;
 import com.saucelabs.grid.SauceOnDemandCapabilities;
+import com.saucelabs.saucerest.SauceREST;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -12,6 +13,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.URL;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +28,7 @@ public class SauceOnDemandServiceImpl implements SauceOnDemandService {
     private final HttpHost h = new HttpHost(host);
     public final static String STATUS = "http://" + host + "/rest/v1/info/status";
     public final static String BROWSERS = "http://" + host + "/rest/v1/info/browsers";
+    public final static String PROVISIONING = "https://{0}:{1}@" + host + "/rest/v1/{0}/limits";
     private static final String SELENIUM_BROWSERS = BROWSERS + "/selenium-rc";
     private static final String WEB_DRIVER_BROWSERS = BROWSERS + "/webdriver";
 
@@ -33,7 +37,6 @@ public class SauceOnDemandServiceImpl implements SauceOnDemandService {
     }
 
     /**
-     * TODO does this work?
      * @return
      * @throws SauceOnDemandRestAPIException
      */
@@ -54,6 +57,20 @@ public class SauceOnDemandServiceImpl implements SauceOnDemandService {
 
     public List<SauceOnDemandCapabilities> getSeleniumBrowsers() throws SauceOnDemandRestAPIException {
         return getBrowsers(SELENIUM_BROWSERS);
+    }
+
+    public int getMaxiumumSessions(String userName, String accessKey) throws SauceOnDemandRestAPIException {
+        String json = "none";
+        try {
+            SauceREST sauceRest = new SauceREST(userName, accessKey);
+            json = sauceRest.retrieveResults(new URL(MessageFormat.format(PROVISIONING, userName, accessKey)));
+
+            //json = executeCommand(MessageFormat.format(PROVISIONING, userName, accessKey));
+            JSONObject jsonObject = new JSONObject(json);
+            return jsonObject.getInt("concurrency");
+        } catch (Exception e) {
+            throw new SauceOnDemandRestAPIException("raw response:" + json, e);
+        }
     }
 
     private List<SauceOnDemandCapabilities> getBrowsers(String url) throws SauceOnDemandRestAPIException {
@@ -84,6 +101,8 @@ public class SauceOnDemandServiceImpl implements SauceOnDemandService {
             throw new RuntimeException("failed to execute " + url + " on " + host + " - " + response.getStatusLine());
         }
     }
+
+
 
 
 }

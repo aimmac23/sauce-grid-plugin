@@ -4,10 +4,7 @@ import com.saucelabs.grid.services.SauceOnDemandRestAPIException;
 import com.saucelabs.grid.services.SauceOnDemandService;
 import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
 import org.openqa.grid.common.RegistrationRequest;
-import org.openqa.grid.common.SeleniumProtocol;
 import org.openqa.grid.internal.Registry;
-import org.openqa.grid.internal.TestSlot;
-import org.openqa.grid.web.servlet.RegistryBasedServlet;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import javax.servlet.ServletException;
@@ -21,7 +18,7 @@ import java.util.List;
  * @author François Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionality
  */
-public class SauceOnDemandAdminServlet extends RegistryBasedServlet {
+public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
 
     private static final String UPDATE_BROWSERS = "updateSupportedBrowsers";
     public static final String WEB_DRIVER_CAPABILITIES = "webDriverCapabilities";
@@ -57,32 +54,83 @@ public class SauceOnDemandAdminServlet extends RegistryBasedServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
-            IOException {
+    protected void renderFooter(HttpServletRequest request, StringBuilder builder) {
 
-        String id = req.getParameter("id");
-        SauceOnDemandRemoteProxy p = getProxy(id);
-
-        if (req.getPathInfo().endsWith("/admin")) {
-
-//            RequestDispatcher view = req.getRequestDispatcher("/jsp/sauceAdmin.jsp");
-//            view.forward(req, resp);
-            String page = renderAdminPage(p);
-
-            resp.getWriter().print(page);
-            resp.getWriter().close();
-            return;
-        }
-
-
-        String state = req.getParameter("state");
-        if ("up".equals(state)) {
-            p.setMarkUp(true);
-        } else {
-            p.setMarkUp(false);
-        }
-        resp.sendRedirect("/grid/console");
     }
+
+    @Override
+    protected void renderBody(HttpServletRequest request, StringBuilder builder) {
+        String id = request.getParameter("id");
+        SauceOnDemandRemoteProxy p = getProxy(id);
+        builder.append("<form action='/grid/admin/SauceOnDemandAdminServlet/").append(UPDATE_BROWSERS).append("' method='POST'>");
+        builder.append("<div class='proxy'>");
+        builder.append("<fieldset>");
+        builder.append("<legend class='proxyname' accesskey=c>Sauce OnDemand Configuration</legend>");
+        builder.append("<div>");
+        builder.append("<label for=\"maxSessions\">Max parallel sessions</label> : <input type='text' name='").
+                append(RegistrationRequest.MAX_SESSION).
+                append("' id='").append(RegistrationRequest.MAX_SESSION).
+                append("' value='").append(p.getMaxNumberOfConcurrentTestSessions()).
+                append("' />");
+        builder.append("</div>");
+        builder.append("<div>");
+        builder.append("<label for='").append(SAUCE_USER_NAME).append("'>User Name</label> : <input type='text' name='").
+                append(SAUCE_USER_NAME).
+                append("' id='").append(SAUCE_USER_NAME).
+                append("' value='").append(p.getUserName()).
+                append("' />");
+        builder.append("</div>");
+        builder.append("<div>");
+        builder.append("<label for='").append(SAUCE_ACCESS_KEY).append("'>Access Key</label> : <input type='text' name='").
+                append(SAUCE_ACCESS_KEY).append("' id='").append(SAUCE_ACCESS_KEY).
+                append("' size='50' value='").append(p.getAccessKey()).append("' />");
+        builder.append("</div>");
+        builder.append("<div>");
+        builder.append("<label for='").append(SAUCE_HANDLE_UNSPECIFIED).append("'>Handle All Unspecified Capabilities?</label>");
+        builder.append("<input type='checkbox' name='").append(SAUCE_HANDLE_UNSPECIFIED).
+                append("' id='").append(SAUCE_HANDLE_UNSPECIFIED).append("'");
+        if (p.shouldHandleUnspecifiedCapabilities()) {
+            builder.append(" checked='checked' ");
+        }
+        builder.append("value='Handle All Unspecified Capabilities?'/>");
+        builder.append("</div>");
+        builder.append("</fieldset>");
+        builder.append("</div>");
+
+        builder.append("<div class='proxy'>");
+        builder.append("<fieldset>");
+        builder.append("<legend class='proxyname' accesskey=c>Sauce OnDemand Browsers (WebDriver)</legend>");
+        builder.append("<select name='").append(WEB_DRIVER_CAPABILITIES).append("' multiple='multiple'>");
+        for (SauceOnDemandCapabilities cap : webDriverBrowsers.getAllBrowsers()) {
+
+            builder.append("<option value='").append(cap.getMD5()).append("'>");
+            builder.append(cap);
+            builder.append("</option>");
+        }
+        builder.append("</select>");
+        builder.append("</fieldset>");
+        builder.append("</div>");
+
+        builder.append("<div class='proxy'>");
+        builder.append("<fieldset>");
+        builder.append("<legend class='proxyname' accesskey=c>Sauce OnDemand Browsers (Selenium RC)</legend>");
+        builder.append("<select name='").append(SELENIUM_CAPABILITIES).append("' multiple='multiple'>");
+        for (SauceOnDemandCapabilities cap : seleniumBrowsers.getAllBrowsers()) {
+
+            builder.append("<option value='").append(cap.getMD5()).append("'>");
+            builder.append(cap);
+            builder.append("</option>");
+        }
+        builder.append("</select>");
+        builder.append("</fieldset>");
+        builder.append("</div>");
+
+        builder.append("<input type='hidden' name='id' value='").append(p.getId()).append("' />");
+        builder.append("<input type='submit' value='save' />");
+
+        builder.append("</form>");
+    }
+
 
     private void updateBrowsers(HttpServletRequest req, HttpServletResponse resp,
                                 SauceOnDemandRemoteProxy proxy) {
@@ -123,94 +171,10 @@ public class SauceOnDemandAdminServlet extends RegistryBasedServlet {
         getRegistry().add(newProxy);
     }
 
-
-    private List<TestSlot> createSlots(SauceOnDemandRemoteProxy proxy, SauceOnDemandCapabilities cap) {
-        List<TestSlot> slots = new ArrayList<TestSlot>();
-        for (int i = 0; i < proxy.getMaxNumberOfConcurrentTestSessions(); i++) {
-            slots.add(new TestSlot(proxy, SeleniumProtocol.WebDriver,
-                    SauceOnDemandRemoteProxy.SAUCE_END_POINT, cap.asMap()));
-        }
-        return slots;
-    }
-
-
     private SauceOnDemandRemoteProxy getProxy(String id) {
         return (SauceOnDemandRemoteProxy) getRegistry().getProxyById(id);
     }
 
-    private String renderAdminPage(SauceOnDemandRemoteProxy p) {
 
-        StringBuilder b = new StringBuilder();
-
-        try {
-            b.append("<html>");
-            b.append("<head>");
-            b.append("<title>Sauce OnDemand Grid Configuration</title>");
-            b.append("</head>");
-            b.append("<form action='/grid/admin/SauceOnDemandAdminServlet/").append(UPDATE_BROWSERS).append("' method='POST'>");
-            b.append("<fieldset>");
-            b.append("<legend accesskey=c>Sauce OnDemand Configuration</legend>");
-            b.append("<label for=\"maxSessions\">Max parallel sessions</label> : <input type='text' name='").
-                    append(RegistrationRequest.MAX_SESSION).
-                    append("' id='").append(RegistrationRequest.MAX_SESSION).
-                    append("' value='").append(p.getMaxNumberOfConcurrentTestSessions()).
-                    append("' />");
-
-            b.append("<label for='").append(SAUCE_USER_NAME).append("'>User Name</label> : <input type='text' name='").
-                    append(SAUCE_USER_NAME).
-                    append("' id='").append(SAUCE_USER_NAME).
-                    append("' value='").append(p.getUserName()).
-                    append("' />");
-
-            b.append("<label for='").append(SAUCE_ACCESS_KEY).append("'>Access Key</label> : <input type='text' name='").
-                    append(SAUCE_ACCESS_KEY).append("' id='").append(SAUCE_ACCESS_KEY).
-                    append("' size='50' value='").append(p.getAccessKey()).append("' />");
-
-            b.append("<label for='").append(SAUCE_HANDLE_UNSPECIFIED).append("'>Handle All Unspecified Capabilities?</label>");
-            b.append("<input type='checkbox' name='").append(SAUCE_HANDLE_UNSPECIFIED).
-                    append("' id='").append(SAUCE_HANDLE_UNSPECIFIED).append("'");
-            if (p.shouldHandleUnspecifiedCapabilities()) {
-                b.append(" checked='checked' ");
-            }
-            b.append("value='Handle All Unspecified Capabilities?'/>");
-            b.append("</fieldset>");
-
-
-            b.append("<fieldset>");
-            b.append("<legend accesskey=c>Sauce OnDemand Browsers (WebDriver)</legend>");
-            b.append("<select name='").append(WEB_DRIVER_CAPABILITIES).append("' multiple='multiple'>");
-            for (SauceOnDemandCapabilities cap : webDriverBrowsers.getAllBrowsers()) {
-
-                b.append("<option value='").append(cap.getMD5()).append("'>");
-                b.append(cap);
-                b.append("</option>");
-            }
-            b.append("</select>");
-            b.append("</fieldset>");
-
-            b.append("<fieldset>");
-            b.append("<legend accesskey=c>Sauce OnDemand Browsers (Selenium RC)</legend>");
-            b.append("<select name='").append(SELENIUM_CAPABILITIES).append("' multiple='multiple'>");
-            for (SauceOnDemandCapabilities cap : seleniumBrowsers.getAllBrowsers()) {
-
-                b.append("<option value='").append(cap.getMD5()).append("'>");
-                b.append(cap);
-                b.append("</option>");
-            }
-            b.append("</select>");
-            b.append("</fieldset>");
-            b.append("<input type='hidden' name='id' value='").append(p.getId()).append("' />");
-            b.append("<input type='submit' value='save' />");
-
-            b.append("</form>");
-
-            b.append("</html>");
-        } catch (Exception e) {
-            b.append("Error : " + e.getMessage());
-        }
-
-        return b.toString();
-
-    }
 
 }

@@ -14,7 +14,11 @@ import org.openqa.grid.internal.TestSlot;
 import org.openqa.grid.internal.utils.CapabilityMatcher;
 import org.openqa.grid.internal.utils.HtmlRenderer;
 import org.openqa.grid.selenium.proxy.DefaultRemoteProxy;
+import org.openqa.grid.web.servlet.handler.RequestType;
+import org.openqa.grid.web.servlet.handler.SeleniumBasedRequest;
+import org.openqa.grid.web.servlet.handler.WebDriverRequest;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.internal.HttpClientFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -50,6 +54,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     private CapabilityMatcher capabilityHelper;
 
     private SauceOnDemandService service = new SauceOnDemandServiceImpl();
+    private int maxSauceSessions;
 
     public boolean shouldProxySauceOnDemand() {
         return shouldProxySauceOnDemand;
@@ -61,16 +66,17 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         //read configuration from sauce-ondemand.json
         //TODO include proxy id in json file
 
-        //TODO run unauth Sauce REST API call to verify if Sauce is up?
-
         JSONObject sauceConfiguration = readConfigurationFromFile();
         try {
             if (sauceConfiguration != null) {
                 this.userName = sauceConfiguration.getString(SAUCE_USER_NAME);
                 this.accessKey = sauceConfiguration.getString(SAUCE_ACCESS_KEY);
                 this.shouldHandleUnspecifiedCapabilities = sauceConfiguration.getBoolean(SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES);
+                this.maxSauceSessions = service.getMaxiumumSessions(userName, accessKey);
             }
         } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (SauceOnDemandRestAPIException e) {
             e.printStackTrace();
         }
         Object b = req.getConfiguration().get(SAUCE_ONE);
@@ -84,12 +90,13 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         List<DesiredCapabilities> capabilities = request.getCapabilities();
         for (DesiredCapabilities capability : capabilities) {
             //sauce end point should handle both SeleniumRC and WebDriver requests
-            capability.setCapability(RegistrationRequest.PATH, SAUCE_END_POINT);
+            //capability.setCapability(RegistrationRequest.PATH, SAUCE_END_POINT);
+
         }
         return request;
     }
 
-    private JSONObject readConfigurationFromFile() {
+    private static JSONObject readConfigurationFromFile() {
 
         File file = new File(SAUCE_ONDEMAND_CONFIG_FILE);
         if (file.exists()) {
@@ -120,7 +127,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         try {
             this.markUp = service.isSauceLabUp();
             if (!markUp) {
-                //log an error message?
+                //TODO log an error message?
             }
         } catch (SauceOnDemandRestAPIException e) {
             //error contacting sauce
@@ -233,10 +240,10 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     }
 
     public URL getRemoteHost() {
-        if (shouldHandleUnspecifiedCapabilities()) {
+        if (shouldHandleUnspecifiedCapabilities() //&& we don't have a node that can handle request
+                ) {
             try {
-//                return new URL("http://ondemand.saucelabs.com:80");
-                return new URL("http://" + userName + ":" + accessKey + "@ondemand.saucelabs.com:80");
+                return new URL("http://ondemand.saucelabs.com:80");
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
@@ -244,8 +251,44 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         return remoteHost;
     }
 
-    public void beforeCommand(TestSession session, HttpServletRequest request, HttpServletResponse response) {
-        session.put("lastCommand", request.getMethod() + " - " + request.getPathInfo() + " executed.");
+    public URL getNodeHost() {
+        return remoteHost;
+    }
 
+    @Override
+    public HttpClientFactory getHttpClientFactory() {
+        return new SauceHttpClientFactory(this);
+    }
+
+    @Override
+    public void beforeCommand(TestSession session, HttpServletRequest request, HttpServletResponse response) {
+        if (request instanceof WebDriverRequest && request.getMethod().equals("POST")) {
+            WebDriverRequest seleniumRequest = (WebDriverRequest) request;
+            if (seleniumRequest.getRequestType().equals(RequestType.START_SESSION)) {
+                String body = seleniumRequest.getBody();
+                //convert from String to JSON
+                try {
+                    JSONObject json = new JSONObject(body);
+                    //add username/accessKey
+                    JSONObject desiredCapabilities = json.getJSONObject("desiredCapabilities");
+                    desiredCapabilities.put("username", this.userName);
+                    desiredCapabilities.put("accessKey", this.accessKey);
+                    //convert from JSON to String
+                    seleniumRequest.setBody(json.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+        super.beforeCommand(session, request, response);
+    }
+
+    @Override
+    public int getMaxNumberOfConcurrentTestSessions() {
+        if (shouldProxySauceOnDemand()) {
+            return maxSauceSessions;
+        }
+        return super.getMaxNumberOfConcurrentTestSessions();
     }
 }

@@ -1,37 +1,24 @@
 package com.saucelabs.grid;
 
-import com.google.common.io.ByteStreams;
 import org.openqa.grid.common.GridDocHelper;
 import org.openqa.grid.internal.Registry;
 import org.openqa.grid.internal.RemoteProxy;
 import org.openqa.grid.internal.utils.GridHubConfiguration;
 import org.openqa.grid.internal.utils.HtmlRenderer;
-import org.openqa.grid.web.servlet.RegistryBasedServlet;
 import org.openqa.grid.web.servlet.beta.ConsoleServlet;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
-import java.util.logging.Logger;
 
 /**
  * Reimplementation of {@link ConsoleServlet} to handle displaying Sauce OnDemand proxy information.
  *
  * @author Ross Rowe
  */
-public class SauceOnDemandConsoleServlet extends RegistryBasedServlet {
-
-    private static final Logger log = Logger.getLogger(ConsoleServlet.class.getName());
-    private static String coreVersion;
-    private static String coreRevision;
+public class SauceOnDemandConsoleServlet extends AbstractSauceOnDemandServlet {
 
 
     public SauceOnDemandConsoleServlet(Registry registry) {
@@ -40,122 +27,6 @@ public class SauceOnDemandConsoleServlet extends RegistryBasedServlet {
 
     public SauceOnDemandConsoleServlet() {
         this(null);
-    }
-
-
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        process(request, response);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        process(request, response);
-    }
-
-    protected void process(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-
-        int refresh = -1;
-
-        if (request.getParameter("refresh") != null) {
-            try {
-                refresh = Integer.parseInt(request.getParameter("refresh"));
-            } catch (NumberFormatException e) {
-                // ignore wrong param
-            }
-
-        }
-
-        response.setContentType("text/html");
-        response.setCharacterEncoding("UTF-8");
-        response.setStatus(200);
-
-        StringBuilder builder = new StringBuilder();
-
-        builder.append("<html>");
-        builder.append("<head>");
-        builder
-                .append("<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js'></script>");
-
-        builder.append("<script src='/grid/resources/images/console-beta.js'></script>");
-
-        builder
-                .append("<link href='/grid/resources/images/console-beta.css' rel='stylesheet' type='text/css' />");
-
-
-        if (refresh != -1) {
-            builder.append(String.format("<meta http-equiv='refresh' content='%d' />", refresh));
-        }
-        builder.append("<title>Grid overview</title>");
-
-        builder.append("<style>");
-        builder.append(".busy {");
-        builder.append(" opacity : 0.4;");
-        builder.append("filter: alpha(opacity=40);");
-        builder.append("}");
-        builder.append("</style>");
-        builder.append("</head>");
-
-        builder.append("<body>");
-
-        builder.append("<div id='main_content'>");
-
-        builder.append(getHeader());
-
-        // TODO freynaud : registry to return a copy of proxies ?
-        List<String> nodes = new ArrayList<String>();
-        for (RemoteProxy proxy : getRegistry().getAllProxies()) {
-            HtmlRenderer beta = new SauceOnDemandRenderer(proxy);
-            nodes.add(beta.renderSummary());
-        }
-
-        int size = nodes.size();
-        int rightColumnSize = size / 2;
-        int leftColumnSize = size - rightColumnSize;
-
-
-        builder.append("<div id='leftColumn'>");
-        for (int i = 0; i < leftColumnSize; i++) {
-            builder.append(nodes.get(i));
-        }
-
-
-        builder.append("</div>");
-
-        builder.append("<div id='rightColumn'>");
-        for (int i = leftColumnSize; i < nodes.size(); i++) {
-            builder.append(nodes.get(i));
-        }
-
-
-        builder.append("</div>");
-
-        builder.append("<div class='clearfix'></div>");
-
-        builder.append(getRequestQueue());
-
-
-        if (request.getParameter("config") != null) {
-            builder.append(getConfigInfo(request.getParameter("configDebug") != null));
-        } else {
-            builder.append("<a href='?config=true&configDebug=true'>view config</a>");
-        }
-
-
-        builder.append("</div>");
-        builder.append("</body>");
-        builder.append("</html>");
-
-        InputStream in = new ByteArrayInputStream(builder.toString().getBytes("UTF-8"));
-        try {
-            ByteStreams.copy(in, response.getOutputStream());
-        } finally {
-            in.close();
-            response.getOutputStream().close();
-        }
     }
 
     private Object getRequestQueue() {
@@ -177,19 +48,6 @@ public class SauceOnDemandConsoleServlet extends RegistryBasedServlet {
         return builder.toString();
     }
 
-    private Object getHeader() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("<div id='header'>");
-        builder.append("<h1><a href='http://code.google.com/p/selenium/wiki/Grid2' >Selenium</a></h1>");
-        builder.append("<h2>Hub console - (beta) ");
-        builder.append(coreVersion).append(coreRevision);
-        builder.append("</h2>");
-        builder.append("<div>.</div>");
-        builder.append("</div>");
-        builder.append("");
-        return builder.toString();
-    }
-
 
     /**
      * retracing how the hub config was built to help debugging.
@@ -201,7 +59,7 @@ public class SauceOnDemandConsoleServlet extends RegistryBasedServlet {
         StringBuilder builder = new StringBuilder();
 
         GridHubConfiguration config = getRegistry().getConfiguration();
-        builder.append("<div  id='hubConfig'>");
+        builder.append("<div id='hubConfig'>");
         builder.append("<b>Config for the hub :</b><br/>");
         builder.append(prettyHtmlPrint(config));
 
@@ -291,25 +149,47 @@ public class SauceOnDemandConsoleServlet extends RegistryBasedServlet {
         return b.toString();
     }
 
-    private void getVersion() {
-        final Properties p = new Properties();
+    protected void renderBody(HttpServletRequest request, StringBuilder builder) {
+        List<String> nodes = new ArrayList<String>();
+        for (RemoteProxy proxy : getRegistry().getAllProxies()) {
+            HtmlRenderer beta = new SauceOnDemandRenderer(proxy);
+            nodes.add(beta.renderSummary());
+        }
 
-        InputStream stream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("VERSION.txt");
-        if (stream == null) {
-            log.severe("Couldn't determine version number");
-            return;
+        int size = nodes.size();
+        int rightColumnSize = size / 2;
+        int leftColumnSize = size - rightColumnSize;
+
+
+        builder.append("<div id='leftColumn'>");
+        for (int i = 0; i < leftColumnSize; i++) {
+            builder.append(nodes.get(i));
         }
-        try {
-            p.load(stream);
-        } catch (IOException e) {
-            log.severe("Cannot load version from VERSION.txt" + e.getMessage());
-        }
-        coreVersion = p.getProperty("selenium.core.version");
-        coreRevision = p.getProperty("selenium.core.revision");
-        if (coreVersion == null) {
-            log.severe("Cannot load selenium.core.version from VERSION.txt");
+
+
+        builder.append("</div>");
+
+        builder.append("<div id='rightColumn'>");
+        for (int i = leftColumnSize; i < nodes.size(); i++) {
+            builder.append(nodes.get(i));
         }
     }
+
+    protected void renderFooter(HttpServletRequest request, StringBuilder builder) {
+        builder.append("<div class='clearfix'></div>");
+
+        builder.append(getRequestQueue());
+
+
+        if (request.getParameter("config") != null) {
+            builder.append(getConfigInfo(request.getParameter("configDebug") != null));
+        } else {
+            builder.append("<a href='?config=true&configDebug=true'>view config</a>");
+        }
+
+
+        builder.append("</div>");
+    }
+
 
 }
