@@ -134,18 +134,20 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
 
     private void updateBrowsers(HttpServletRequest req, HttpServletResponse resp,
                                 SauceOnDemandRemoteProxy proxy) {
-        String[] supported = req.getParameterValues(WEB_DRIVER_CAPABILITIES);
+        String[] webDriverCapabilities = req.getParameterValues(WEB_DRIVER_CAPABILITIES);
         List<SauceOnDemandCapabilities> caps = new ArrayList<SauceOnDemandCapabilities>();
-        if (supported != null) {
-            for (String md5 : supported) {
+        if (webDriverCapabilities != null) {
+            for (String md5 : webDriverCapabilities) {
                 caps.add(webDriverBrowsers.get(md5));
             }
         }
+        String[] seleniumRCCapabilities = req.getParameterValues(SELENIUM_CAPABILITIES);
+        if (seleniumRCCapabilities != null) {
+            for (String md5 : seleniumRCCapabilities) {
+                caps.add(seleniumBrowsers.get(md5));
+            }
+        }
         getRegistry().removeIfPresent(proxy);
-
-        RegistrationRequest sauceRequest = proxy.getOriginalRegistrationRequest();
-        // re-create the test slots with the new capabilities.
-        sauceRequest.getCapabilities().clear();
 
         String userName = req.getParameter(SAUCE_USER_NAME);
         String accessKey = req.getParameter(SAUCE_ACCESS_KEY);
@@ -153,18 +155,21 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
         boolean handleUnspecified = req.getParameter(SAUCE_HANDLE_UNSPECIFIED) != null || !(req.getParameter(SAUCE_HANDLE_UNSPECIFIED).equals(""));
         int m = Integer.parseInt(max);
 
+        RegistrationRequest sauceRequest = proxy.getOriginalRegistrationRequest();
+        // re-create the test slots with the new capabilities.
+        sauceRequest.getCapabilities().clear();
         sauceRequest.getConfiguration().put(RegistrationRequest.MAX_SESSION, m);
         for (SauceOnDemandCapabilities cap : caps) {
             DesiredCapabilities c = new DesiredCapabilities(cap.asMap());
             c.setCapability(RegistrationRequest.MAX_INSTANCES, m);
-            c.setCapability("user-name", userName);
-            c.setCapability("access-key", accessKey);
             sauceRequest.getCapabilities().add(c);
         }
 
         //write selected browsers/auth details to sauce-ondemand.json
         proxy.setUserName(userName);
         proxy.setAccessKey(accessKey);
+        proxy.setWebDriverCapabilities(webDriverCapabilities);
+        proxy.setSeleniumCapabilities(seleniumRCCapabilities);
         proxy.setShouldHandleUnspecifiedCapabilities(handleUnspecified);
         proxy.writeConfigurationToFile();
         SauceOnDemandRemoteProxy newProxy = new SauceOnDemandRemoteProxy(sauceRequest, getRegistry());
@@ -174,7 +179,6 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
     private SauceOnDemandRemoteProxy getProxy(String id) {
         return (SauceOnDemandRemoteProxy) getRegistry().getProxyById(id);
     }
-
 
 
 }
