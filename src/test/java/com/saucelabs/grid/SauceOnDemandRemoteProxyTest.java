@@ -32,9 +32,9 @@ public class SauceOnDemandRemoteProxyTest {
     remote.startRemoteServer();
     remote.getConfiguration().put(RegistrationRequest.TIME_OUT, -1);
     remote.getConfiguration()
-        .put(RegistrationRequest.PROXY_CLASS, "org.openqa.SauceLabRemoteProxy");
+        .put(RegistrationRequest.PROXY_CLASS, "com.saucelabs.grid.SauceOnDemandRemoteProxy");
     remote.sendRegistrationRequest();
-    
+
     registerSauceLabProxy();
 
   }
@@ -42,11 +42,11 @@ public class SauceOnDemandRemoteProxyTest {
   private void registerSauceLabProxy() throws Exception {
     SelfRegisteringRemote remote = TestHelper.getRemoteWithoutCapabilities(hub.getUrl(), GridRole.NODE);
     remote.addBrowser(DesiredCapabilities.firefox(), 2);
-    
+
 
     remote.getConfiguration().put(RegistrationRequest.TIME_OUT, -1);
     remote.getConfiguration()
-        .put(RegistrationRequest.PROXY_CLASS, "org.openqa.SauceLabRemoteProxy");
+        .put(RegistrationRequest.PROXY_CLASS, "com.saucelabs.grid.SauceOnDemandRemoteProxy");
     remote.getConfiguration().put(SauceOnDemandRemoteProxy.SAUCE_ONE, true);
     System.out.println(remote.getConfiguration());
     remote.sendRegistrationRequest();
