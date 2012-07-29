@@ -7,9 +7,9 @@
     <name>sauce-grid-plugin</name>
     <description>Selenium Grid plugin that provides integration with Sauce OnDemand</description>
     <scm>
-        <connection>scm:git:git://github.com/rossrowe/saucerest-java.git</connection>
-        <developerConnection>scm:git:git@github.com:rossrowe/saucerest-java.git</developerConnection>
-        <url>git@github.com:rossrowe/saucerest-java.git</url>
+        <connection>scm:git:git://github.com/rossrowe/sauce-grid-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:rossrowe/sauce-grid-plugin.git</developerConnection>
+        <url>git@github.com:rossrowe/sauce-grid-plugin.git</url>
     </scm>
     <distributionManagement>
         <repository>
@@ -35,7 +35,12 @@
         <dependency>
             <groupId>com.saucelabs</groupId>
             <artifactId>saucerest</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.saucelabs</groupId>
+            <artifactId>sauce_java_common</artifactId>
+            <version>1.0.5</version>
         </dependency>
 
     </dependencies>

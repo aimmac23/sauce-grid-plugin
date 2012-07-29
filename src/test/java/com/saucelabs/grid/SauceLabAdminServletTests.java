@@ -36,7 +36,7 @@ public class SauceLabAdminServletTests {
     remote.getConfiguration().put(RegistrationRequest.ID, "sauceProxy");
     remote.getConfiguration()
         .put(RegistrationRequest.PROXY_CLASS, "com.saucelabs.grid.SauceOnDemandRemoteProxy");
-    remote.getConfiguration().put(SauceOnDemandRemoteProxy.SAUCE_ONE, true);
+    remote.getConfiguration().put(SauceOnDemandRemoteProxy.SAUCE_ENABLE, true);
     System.out.println(remote.getConfiguration());
     remote.sendRegistrationRequest();
 
