@@ -16,9 +16,7 @@ import org.openqa.grid.internal.utils.CapabilityMatcher;
 import org.openqa.grid.internal.utils.HtmlRenderer;
 import org.openqa.grid.selenium.proxy.DefaultRemoteProxy;
 import org.openqa.grid.web.servlet.handler.RequestType;
-import org.openqa.grid.web.servlet.handler.SeleniumBasedRequest;
 import org.openqa.grid.web.servlet.handler.WebDriverRequest;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.internal.HttpClientFactory;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,12 +26,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ *
+ * This proxy instance is designed to forward requests to Sauce OnDemand.  Requests will be forwarded to Sauce OnDemand
+ * if the proxy is configured to 'failover' (ie. handle desired capabilities that are not handled by any other node in
+ * the hub), or if the proxy is configured to respond to a specific desired capability.
+ *
  * @author François Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionality
  */
@@ -47,7 +49,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     public static final String SAUCE_ONDEMAND_CONFIG_FILE = "sauce-ondemand.json";
     public static final String SAUCE_USER_NAME = "sauceUserName";
     public static final String SAUCE_ACCESS_KEY = "sauceAccessKey";
-    private volatile boolean markUp = false;
+    private volatile boolean sauceAvailable = false;
 
     private String userName;
     private String accessKey;
@@ -63,6 +65,16 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     public static final String SAUCE_WEB_DRIVER_CAPABILITIES = "sauceWebDriverCapabilities";
     public static final String SAUCE_RC_CAPABILITIES = "sauceSeleniumRCCapabilities";
     private String[] seleniumCapabilities;
+    private static URL SAUCE_ONDEMAND_URL;
+
+    static {
+        try {
+            SAUCE_ONDEMAND_URL = new URL("http://ondemand.saucelabs.com:80");
+        } catch (MalformedURLException e) {
+            //shouldn't happen
+            logger.log(Level.SEVERE, "Error constructing remote host url", e);
+        }
+    }
 
     public boolean shouldProxySauceOnDemand() {
         return shouldProxySauceOnDemand;
@@ -75,9 +87,9 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         try {
             this.userName = (String) req.getConfiguration().get(SAUCE_USER_NAME);
             this.accessKey = (String) req.getConfiguration().get(SAUCE_ACCESS_KEY);
-            Object o = req.getConfiguration().get(SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES);
+            String o = (String) req.getConfiguration().get(SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES);
             if (o != null) {
-                this.shouldHandleUnspecifiedCapabilities = (Boolean) o;
+                this.shouldHandleUnspecifiedCapabilities =Boolean.valueOf(o);
             }
             if (userName != null && accessKey != null) {
                 this.maxSauceSessions = service.getMaxiumumSessions(userName, accessKey);
@@ -112,14 +124,9 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     }
 
     private static RegistrationRequest updateDesiredCapabilities(RegistrationRequest request) {
-        //TODO ensure thread safety
-
         JSONObject sauceConfiguration = readConfigurationFromFile();
         try {
             if (sauceConfiguration != null) {
-
-                //sauce end point should handle both SeleniumRC and WebDriver requests
-                //capability.setCapability(RegistrationRequest.PATH, SAUCE_END_POINT);
                 if (sauceConfiguration.has(SAUCE_USER_NAME)) {
                     request.getConfiguration().put(SAUCE_USER_NAME, sauceConfiguration.getString(SAUCE_USER_NAME));
                 }
@@ -169,14 +176,14 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         //(and the browser capabillitiy is supported by Sauce), create new desired capability that runs
         //against sauce
         try {
-            this.markUp = service.isSauceLabUp();
-            if (!markUp) {
+            this.sauceAvailable = service.isSauceLabUp();
+            if (!sauceAvailable) {
                 //TODO log an error message?
             }
         } catch (SauceOnDemandRestAPIException e) {
             logger.log(Level.SEVERE, "Error invoking Sauce REST API", e);
         }
-        if ((shouldProxySauceOnDemand && markUp) || !shouldProxySauceOnDemand) {
+        if ((shouldProxySauceOnDemand && sauceAvailable) || !shouldProxySauceOnDemand) {
             return super.getNewSession(requestedCapability);
         } else {
             return null;
@@ -227,12 +234,12 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         return false;
     }
 
-    public synchronized boolean isMarkUp() {
-        return markUp;
+    public synchronized boolean isSauceAvailable() {
+        return sauceAvailable;
     }
 
-    public synchronized void setMarkUp(boolean markUp) {
-        this.markUp = markUp;
+    public synchronized void setSauceAvailable(boolean sauceAvailable) {
+        this.sauceAvailable = sauceAvailable;
     }
 
 
@@ -281,17 +288,14 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         this.shouldHandleUnspecifiedCapabilities = shouldHandleUnspecifiedCapabilities;
     }
 
+    /**
+     * There isn't an easy way to return a remote host based on the specific {@link TestSlot}, so we
+     * always return ondemand.saucelabs.com
+     *
+     * @return
+     */
     public URL getRemoteHost() {
-        if (shouldHandleUnspecifiedCapabilities() //&& we don't have a node that can handle request
-                ) {
-            try {
-                return new URL("http://ondemand.saucelabs.com:80");
-            } catch (MalformedURLException e) {
-                //shouldn't happen
-                logger.log(Level.SEVERE, "Error constructing remote host url", e);
-            }
-        }
-        return remoteHost;
+        return SAUCE_ONDEMAND_URL;
     }
 
     public URL getNodeHost() {

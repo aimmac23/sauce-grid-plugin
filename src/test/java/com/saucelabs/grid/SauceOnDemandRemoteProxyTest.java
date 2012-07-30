@@ -93,6 +93,42 @@ public class SauceOnDemandRemoteProxyTest {
         }
     }
 
+    @Test()
+    public void sauceSpecificBrowser() throws Exception {
+        DesiredCapabilities capabillities = DesiredCapabilities.firefox();
+        capabillities.setCapability("version", "12");
+        capabillities.setCapability("platform", Platform.XP);
+
+        SelfRegisteringRemote remote = createSauceNode(capabillities);
+        remote.getConfiguration().put(SauceOnDemandRemoteProxy.SAUCE_USER_NAME, authentication.getUsername());
+        remote.getConfiguration().put(SauceOnDemandRemoteProxy.SAUCE_ACCESS_KEY, authentication.getAccessKey());
+        remote.getConfiguration().put(SauceOnDemandRemoteProxy.SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES, false);
+        registerNode(remote);
+        RemoteWebDriver driver = null;
+        String sessionId = null;
+        try {
+
+            DesiredCapabilities ff = DesiredCapabilities.firefox();
+                       ff.setCapability("version", "12");
+                       ff.setCapability("platform", Platform.XP);
+            driver = new RemoteWebDriver(new URL(hub.getUrl() + "/wd/hub"), ff);
+            driver.get("http://www.amazon.com/");
+            sessionId = driver.getSessionId().toString();
+            assertEquals(
+                    "Amazon.com: Online Shopping for Electronics, Apparel, Computers, Books, DVDs & more",
+                    driver.getTitle());
+        } finally {
+            if (driver != null) {
+                driver.quit();
+                SauceREST sauceREST = new SauceREST(authentication.getUsername(), authentication.getAccessKey());
+                assertNotNull("Session id is null", sessionId);
+                String json = sauceREST.getJobInfo(sessionId);
+                JSONObject jsonObject = new JSONObject(json);
+                assertNotNull("Unable to parse JSON", jsonObject);
+            }
+        }
+    }
+
     private void registerNode(SelfRegisteringRemote remote) throws Exception {
         remote.startRemoteServer();
         remote.sendRegistrationRequest();

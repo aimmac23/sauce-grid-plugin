@@ -9,8 +9,10 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author Ross Rowe
+ */
 public class SauceOnDemandRenderer extends WebProxyHtmlRendererBeta {
-
 
     private SauceOnDemandRemoteProxy sauceProxy;
 
@@ -51,35 +53,41 @@ public class SauceOnDemandRenderer extends WebProxyHtmlRendererBeta {
         if (sauceProxy.shouldHandleUnspecifiedCapabilities()) {
             builder.append("Unspecified capabililities will be forwarded to Sauce OnDemand");
         } else {
-            builder.append("<ul>");
-            List<TestSlot> slots = sauceProxy.getTestSlots();
+
             int max = sauceProxy.getMaxNumberOfConcurrentTestSessions();
-            for (int i = 0; i < slots.size(); i += max) {
-                TestSlot slot = slots.get(i);
-                builder.append("<li>" + slot.getCapabilities().get(SauceOnDemandCapabilities.NAME));
+            if (max > 0) {
+                builder.append("<ul>");
+                List<TestSlot> slots = sauceProxy.getTestSlots();
+                for (int i = 0; i < slots.size(); i += max) {
+                    TestSlot slot = slots.get(i);
+                    Object capability = slot.getCapabilities().get(SauceOnDemandCapabilities.NAME);
+                    if (capability != null) {
+                        builder.append("<li>" + capability);
 
-                int used = 0;
-                for (int j = 0; j < i + max; j++) {
-                    if (j >= slots.size()) {
-                        break;
+                        int used = 0;
+                        for (int j = 0; j < i + max; j++) {
+                            if (j >= slots.size()) {
+                                break;
+                            }
+                            TestSlot slo = slots.get(j);
+                            if (slo.getSession() != null) {
+                                used++;
+                            }
+                        }
+                        if (used != 0) {
+                            builder.append("(running : " + used + ")");
+                        }
+
+                        builder.append("</li>");
                     }
-                    TestSlot slo = slots.get(j);
-                    if (slo.getSession() != null) {
-                        used++;
-                    }
-                }
-                if (used != 0) {
-                    builder.append("(running : " + used + ")");
-                }
 
-                builder.append("</li>");
-
+                }
+                builder.append("</ul>");
             }
-            builder.append("</ul>");
         }
 
         builder.append("<br/><a href='/grid/admin/SauceOnDemandAdminServlet/admin?id=" + sauceProxy.getId()
-                        + "' >Configure Proxy</a></br>");
+                + "' >Configure Proxy</a></br>");
 
         builder.append("</fieldset>");
         builder.append("</div>");

@@ -13,12 +13,16 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author François Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionality
  */
 public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
+
+    private static final Logger logger = Logger.getLogger(SauceOnDemandAdminServlet.class.getName());
 
     private static final String UPDATE_BROWSERS = "updateSupportedBrowsers";
     public static final String WEB_DRIVER_CAPABILITIES = "webDriverCapabilities";
@@ -49,7 +53,7 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
         SauceOnDemandRemoteProxy p = getProxy(id);
         if (req.getPathInfo().endsWith(UPDATE_BROWSERS)) {
             updateBrowsers(req, resp, p);
-            resp.sendRedirect("/grid/console");
+            resp.sendRedirect("/grid/admin/SauceOnDemandConsoleServlet");
         }
     }
 
@@ -66,13 +70,7 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
         builder.append("<div class='proxy'>");
         builder.append("<fieldset>");
         builder.append("<legend class='proxyname' accesskey=c>Sauce OnDemand Configuration</legend>");
-        builder.append("<div>");
-        builder.append("<label for=\"maxSessions\">Max parallel sessions</label> : <input type='text' name='").
-                append(RegistrationRequest.MAX_SESSION).
-                append("' id='").append(RegistrationRequest.MAX_SESSION).
-                append("' value='").append(p.getMaxNumberOfConcurrentTestSessions()).
-                append("' />");
-        builder.append("</div>");
+
         builder.append("<div>");
         builder.append("<label for='").append(SAUCE_USER_NAME).append("'>User Name</label> : <input type='text' name='").
                 append(SAUCE_USER_NAME).
@@ -86,7 +84,7 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
                 append("' size='50' value='").append(p.getAccessKey()).append("' />");
         builder.append("</div>");
         builder.append("<div>");
-        builder.append("<label for='").append(SAUCE_HANDLE_UNSPECIFIED).append("'>Handle All Unspecified Capabilities?</label>");
+        builder.append("<label for='").append(SAUCE_HANDLE_UNSPECIFIED).append("'>Handle All Unspecified Capabilities? : </label>");
         builder.append("<input type='checkbox' name='").append(SAUCE_HANDLE_UNSPECIFIED).
                 append("' id='").append(SAUCE_HANDLE_UNSPECIFIED).append("'");
         if (p.shouldHandleUnspecifiedCapabilities()) {
@@ -94,12 +92,21 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
         }
         builder.append("value='Handle All Unspecified Capabilities?'/>");
         builder.append("</div>");
+
+        builder.append("<div>");
+        builder.append("<label for=\"maxSessions\">Max parallel sessions</label> : <input type='text' name='").
+                append(RegistrationRequest.MAX_SESSION).
+                append("' disabled=true id='").append(RegistrationRequest.MAX_SESSION).
+                append("' value='").append(p.getMaxNumberOfConcurrentTestSessions()).
+                append("' />");
+        builder.append("</div>");
+
         builder.append("</fieldset>");
         builder.append("</div>");
 
         builder.append("<div class='proxy'>");
         builder.append("<fieldset>");
-        builder.append("<legend class='proxyname' accesskey=c>Sauce OnDemand Browsers (WebDriver)</legend>");
+        builder.append("<legend class='proxyname' accesskey=c>Supported Browsers (WebDriver)</legend>");
         builder.append("<select name='").append(WEB_DRIVER_CAPABILITIES).append("' multiple='multiple'>");
         for (SauceOnDemandCapabilities cap : webDriverBrowsers.getAllBrowsers()) {
 
@@ -113,7 +120,7 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
 
         builder.append("<div class='proxy'>");
         builder.append("<fieldset>");
-        builder.append("<legend class='proxyname' accesskey=c>Sauce OnDemand Browsers (Selenium RC)</legend>");
+        builder.append("<legend class='proxyname' accesskey=c>Supported Browsers (Selenium RC)</legend>");
         builder.append("<select name='").append(SELENIUM_CAPABILITIES).append("' multiple='multiple'>");
         for (SauceOnDemandCapabilities cap : seleniumBrowsers.getAllBrowsers()) {
 
@@ -126,7 +133,7 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
         builder.append("</div>");
 
         builder.append("<input type='hidden' name='id' value='").append(p.getId()).append("' />");
-        builder.append("<input type='submit' value='save' />");
+        builder.append("<input type='submit' value='Save' />");
 
         builder.append("</form>");
     }
@@ -151,17 +158,22 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
 
         String userName = req.getParameter(SAUCE_USER_NAME);
         String accessKey = req.getParameter(SAUCE_ACCESS_KEY);
-        String max = req.getParameter(RegistrationRequest.MAX_SESSION);
-        boolean handleUnspecified = req.getParameter(SAUCE_HANDLE_UNSPECIFIED) != null || !(req.getParameter(SAUCE_HANDLE_UNSPECIFIED).equals(""));
-        int m = Integer.parseInt(max);
+        boolean handleUnspecified = req.getParameter(SAUCE_HANDLE_UNSPECIFIED) != null && !(req.getParameter(SAUCE_HANDLE_UNSPECIFIED).equals(""));
 
         RegistrationRequest sauceRequest = proxy.getOriginalRegistrationRequest();
         // re-create the test slots with the new capabilities.
         sauceRequest.getCapabilities().clear();
-        sauceRequest.getConfiguration().put(RegistrationRequest.MAX_SESSION, m);
+
+        int maxSauceSessions = 0;
+        try {
+            maxSauceSessions = service.getMaxiumumSessions(userName, accessKey);
+        } catch (SauceOnDemandRestAPIException e) {
+            logger.log(Level.SEVERE, "Error invoking Sauce REST API", e);
+        }
+        sauceRequest.getConfiguration().put(RegistrationRequest.MAX_SESSION, maxSauceSessions);
         for (SauceOnDemandCapabilities cap : caps) {
             DesiredCapabilities c = new DesiredCapabilities(cap.asMap());
-            c.setCapability(RegistrationRequest.MAX_INSTANCES, m);
+            c.setCapability(RegistrationRequest.MAX_INSTANCES, maxSauceSessions);
             sauceRequest.getCapabilities().add(c);
         }
 

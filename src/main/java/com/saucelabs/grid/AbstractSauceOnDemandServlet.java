@@ -25,6 +25,7 @@ public abstract class AbstractSauceOnDemandServlet extends RegistryBasedServlet 
 
     public AbstractSauceOnDemandServlet(Registry registry) {
         super(registry);
+        getVersion();
     }
 
     @Override
@@ -141,4 +142,6 @@ public abstract class AbstractSauceOnDemandServlet extends RegistryBasedServlet 
             log.severe("Cannot load selenium.core.version from VERSION.txt");
         }
     }
+
+
 }
