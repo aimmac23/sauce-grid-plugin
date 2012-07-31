@@ -18,6 +18,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Servlet which allows the user to enter the configuration details for the Sauce proxy.
+ *
  * @author François Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionality
  */

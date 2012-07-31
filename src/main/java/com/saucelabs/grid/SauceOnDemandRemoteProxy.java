@@ -44,30 +44,27 @@ import java.util.logging.Logger;
 public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     private static final Logger logger = Logger.getLogger(SauceOnDemandRemoteProxy.class.getName());
-    /**
-     * Send all Sauce OnDemand requests to ondemand.saucelabs.com/wd/hub.
-     */
-    public static String SAUCE_END_POINT = "/wd/hub";
+    private static final SauceOnDemandService service = new SauceOnDemandServiceImpl();
+
     public static final String SAUCE_ONDEMAND_CONFIG_FILE = "sauce-ondemand.json";
     public static final String SAUCE_USER_NAME = "sauceUserName";
     public static final String SAUCE_ACCESS_KEY = "sauceAccessKey";
-    private volatile boolean sauceAvailable = false;
-
-    private String userName;
-    private String accessKey;
-    public static final String SAUCE_ENABLE = "sauceEnable";
-    private boolean shouldProxySauceOnDemand = true;
-    private boolean shouldHandleUnspecifiedCapabilities;
     public static final String SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES = "sauceHandleUnspecifiedCapabilities";
-    private CapabilityMatcher capabilityHelper;
-
-    private static final SauceOnDemandService service = new SauceOnDemandServiceImpl();
-    private int maxSauceSessions;
-    private String[] webDriverCapabilities;
+    public static final String SAUCE_ENABLE = "sauceEnable";
     public static final String SAUCE_WEB_DRIVER_CAPABILITIES = "sauceWebDriverCapabilities";
     public static final String SAUCE_RC_CAPABILITIES = "sauceSeleniumRCCapabilities";
-    private String[] seleniumCapabilities;
     private static URL SAUCE_ONDEMAND_URL;
+
+    private volatile boolean sauceAvailable = false;
+    private String userName;
+    private String accessKey;
+    private boolean shouldProxySauceOnDemand = true;
+    private boolean shouldHandleUnspecifiedCapabilities;
+    private CapabilityMatcher capabilityHelper;
+    private int maxSauceSessions;
+    private String[] webDriverCapabilities;
+    private String[] seleniumCapabilities;
+
 
     static {
         try {
@@ -182,7 +179,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         } catch (JSONException e) {
             logger.log(Level.SEVERE, "Error parsing JSON", e);
         } catch (SauceOnDemandRestAPIException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            logger.log(Level.SEVERE, "Error invoking Sauce REST API", e);
         }
         return request;
     }
@@ -218,7 +215,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         try {
             this.sauceAvailable = service.isSauceLabUp();
             if (!sauceAvailable) {
-                //TODO log an error message?
+                throw new RuntimeException("Sauce OnDemand is not available");
             }
         } catch (SauceOnDemandRestAPIException e) {
             logger.log(Level.SEVERE, "Error invoking Sauce REST API", e);
@@ -263,25 +260,6 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
             }
         }
     }
-
-    public boolean contains(SauceOnDemandCapabilities capabilities) throws JSONException {
-        for (TestSlot slot : getTestSlots()) {
-            SauceOnDemandCapabilities slc = new SauceOnDemandCapabilities(slot.getCapabilities());
-            if (slc.equals(capabilities)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public synchronized boolean isSauceAvailable() {
-        return sauceAvailable;
-    }
-
-    public synchronized void setSauceAvailable(boolean sauceAvailable) {
-        this.sauceAvailable = sauceAvailable;
-    }
-
 
     public String getUserName() {
         return userName;

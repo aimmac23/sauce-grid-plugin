@@ -7,6 +7,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.openqa.selenium.remote.internal.HttpClientFactory;
 
 /**
+ * {@link HttpClientFactory} subclass that will include the user credentials within the {@link HttpClient} instance.
  * @author Ross Rowe
  */
 public class SauceHttpClientFactory extends HttpClientFactory {

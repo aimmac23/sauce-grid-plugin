@@ -6,10 +6,11 @@ import org.openqa.selenium.Platform;
 import java.util.Map;
 
 /**
+ * Handles the matching of requested capabilities with those handled by the Sauce Node.
+ *
  * @author Ross Rowe
  */
 public class SauceOnDemandCapabilityMatcher extends DefaultCapabilityMatcher {
-
 
     private SauceOnDemandRemoteProxy proxy;
 
@@ -24,19 +25,6 @@ public class SauceOnDemandCapabilityMatcher extends DefaultCapabilityMatcher {
             return true;
         } else {
             return super.matches(nodeCapability, requestedCapability);
-//            if (!result) {
-//                result = true;
-//                //the node capability will be created using the node OS as the platform
-//                //compare the capabilities, ignoring the platform
-//                for (String key : requestedCapability.keySet()) {
-//                    if (requestedCapability.get(key) != null && !(key.equals("platform"))) {
-//                        if (!requestedCapability.get(key).equals(nodeCapability.get(key))) {
-//                            result = false;
-//                        }
-//                    }
-//                }
-//            }
-//            return result;
         }
     }
 }

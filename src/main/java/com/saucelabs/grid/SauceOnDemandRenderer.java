@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Handles rendering the HTML fragment used to display the configuration details of the Sauce Proxy.
+ *
  * @author Ross Rowe
  */
 public class SauceOnDemandRenderer extends WebProxyHtmlRendererBeta {

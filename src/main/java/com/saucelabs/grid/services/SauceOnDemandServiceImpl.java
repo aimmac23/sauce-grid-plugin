@@ -19,6 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ *
+ * Handles invoking the Sauce REST API to return information about browsers/server status.
+ *
+ * TODO use the Sauce REST Java API
+ *
  * @author François Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionality
  */

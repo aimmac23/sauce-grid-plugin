@@ -3,6 +3,10 @@ package com.saucelabs.grid;
 import java.util.*;
 
 /**
+ * Retains a cache of the browser information retrieved from Sauce.
+ *
+ * TODO handle expiring of the cache
+ *
  * @author François Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionality
  */

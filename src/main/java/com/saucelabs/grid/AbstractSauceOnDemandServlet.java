@@ -14,6 +14,10 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 /**
+ * Contains common logic for the Sauce-specific servlets.  This class (and it's subclasses) are largely
+ * copied from {@link org.openqa.grid.web.servlet.beta.ConsoleServlet}, so as to retain the updated look
+ * and feel, while providing a slightly different way of presenting the data.
+ *
  * @author Ross Rowe
  */
 public abstract class AbstractSauceOnDemandServlet extends RegistryBasedServlet {
@@ -40,6 +44,12 @@ public abstract class AbstractSauceOnDemandServlet extends RegistryBasedServlet 
         process(request, response);
     }
 
+    /**
+     * Copied from {@}
+     * @param request
+     * @param response
+     * @throws IOException
+     */
     protected void process(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
