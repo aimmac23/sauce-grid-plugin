@@ -3,6 +3,7 @@ package com.saucelabs.grid;
 import com.saucelabs.grid.services.SauceOnDemandRestAPIException;
 import com.saucelabs.grid.services.SauceOnDemandService;
 import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
+import org.json.JSONException;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.Registry;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -110,7 +111,13 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
         builder.append("<select name='").append(WEB_DRIVER_CAPABILITIES).append("' multiple='multiple'>");
         for (SauceOnDemandCapabilities cap : webDriverBrowsers.getAllBrowsers()) {
 
-            builder.append("<option value='").append(cap.getMD5()).append("'>");
+            builder.append("<option value='").append(cap.getMD5()).append('\'');
+
+            if (p.isWebDriverBrowserSelected(cap)) {
+                builder.append(" selected ");
+            }
+
+            builder.append(">");
             builder.append(cap);
             builder.append("</option>");
         }
@@ -141,19 +148,8 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
 
     private void updateBrowsers(HttpServletRequest req, HttpServletResponse resp,
                                 SauceOnDemandRemoteProxy proxy) {
-        String[] webDriverCapabilities = req.getParameterValues(WEB_DRIVER_CAPABILITIES);
-        List<SauceOnDemandCapabilities> caps = new ArrayList<SauceOnDemandCapabilities>();
-        if (webDriverCapabilities != null) {
-            for (String md5 : webDriverCapabilities) {
-                caps.add(webDriverBrowsers.get(md5));
-            }
-        }
-        String[] seleniumRCCapabilities = req.getParameterValues(SELENIUM_CAPABILITIES);
-        if (seleniumRCCapabilities != null) {
-            for (String md5 : seleniumRCCapabilities) {
-                caps.add(seleniumBrowsers.get(md5));
-            }
-        }
+
+
         getRegistry().removeIfPresent(proxy);
 
         String userName = req.getParameter(SAUCE_USER_NAME);
@@ -171,12 +167,8 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
             logger.log(Level.SEVERE, "Error invoking Sauce REST API", e);
         }
         sauceRequest.getConfiguration().put(RegistrationRequest.MAX_SESSION, maxSauceSessions);
-        for (SauceOnDemandCapabilities cap : caps) {
-            DesiredCapabilities c = new DesiredCapabilities(cap.asMap());
-            c.setCapability(RegistrationRequest.MAX_INSTANCES, maxSauceSessions);
-            sauceRequest.getCapabilities().add(c);
-        }
-
+        String[] webDriverCapabilities = req.getParameterValues(WEB_DRIVER_CAPABILITIES);
+        String[] seleniumRCCapabilities = req.getParameterValues(SELENIUM_CAPABILITIES);
         //write selected browsers/auth details to sauce-ondemand.json
         proxy.setUserName(userName);
         proxy.setAccessKey(accessKey);

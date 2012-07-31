@@ -17,6 +17,7 @@ import org.openqa.grid.internal.utils.HtmlRenderer;
 import org.openqa.grid.selenium.proxy.DefaultRemoteProxy;
 import org.openqa.grid.web.servlet.handler.RequestType;
 import org.openqa.grid.web.servlet.handler.WebDriverRequest;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.internal.HttpClientFactory;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,12 +27,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * This proxy instance is designed to forward requests to Sauce OnDemand.  Requests will be forwarded to Sauce OnDemand
  * if the proxy is configured to 'failover' (ie. handle desired capabilities that are not handled by any other node in
  * the hub), or if the proxy is configured to respond to a specific desired capability.
@@ -59,7 +61,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     public static final String SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES = "sauceHandleUnspecifiedCapabilities";
     private CapabilityMatcher capabilityHelper;
 
-    private SauceOnDemandService service = new SauceOnDemandServiceImpl();
+    private static final SauceOnDemandService service = new SauceOnDemandServiceImpl();
     private int maxSauceSessions;
     private String[] webDriverCapabilities;
     public static final String SAUCE_WEB_DRIVER_CAPABILITIES = "sauceWebDriverCapabilities";
@@ -89,7 +91,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
             this.accessKey = (String) req.getConfiguration().get(SAUCE_ACCESS_KEY);
             String o = (String) req.getConfiguration().get(SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES);
             if (o != null) {
-                this.shouldHandleUnspecifiedCapabilities =Boolean.valueOf(o);
+                this.shouldHandleUnspecifiedCapabilities = Boolean.valueOf(o);
             }
             if (userName != null && accessKey != null) {
                 this.maxSauceSessions = service.getMaxiumumSessions(userName, accessKey);
@@ -115,6 +117,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
                     }
                 }
             }
+
         } catch (JSONException e) {
             logger.log(Level.SEVERE, "Error parsing JSON", e);
         } catch (SauceOnDemandRestAPIException e) {
@@ -140,9 +143,46 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
                     request.getConfiguration().put(SAUCE_ENABLE, sauceConfiguration.getString(SAUCE_ENABLE));
                 }
 
+                List<SauceOnDemandCapabilities> caps = new ArrayList<SauceOnDemandCapabilities>();
+                if (sauceConfiguration.has(SAUCE_WEB_DRIVER_CAPABILITIES)) {
+                    request.getCapabilities().clear();
+                    BrowsersCache webDriverBrowsers = new BrowsersCache(service.getWebDriverBrowsers());
+
+                    JSONArray keyArray = sauceConfiguration.getJSONArray(SAUCE_WEB_DRIVER_CAPABILITIES);
+                    for (int i = 0; i < keyArray.length(); i++) {
+                        SauceOnDemandCapabilities sauceOnDemandCapabilities = webDriverBrowsers.get(keyArray.getString(i));
+                        if (sauceOnDemandCapabilities != null) {
+                            caps.add(sauceOnDemandCapabilities);
+                        }
+
+                    }
+                }
+                if (sauceConfiguration.has(SAUCE_RC_CAPABILITIES)) {
+                    request.getCapabilities().clear();
+                    BrowsersCache seleniumBrowsers = new BrowsersCache(service.getSeleniumBrowsers());
+
+                    JSONArray keyArray = sauceConfiguration.getJSONArray(SAUCE_RC_CAPABILITIES);
+                    for (int i = 0; i < keyArray.length(); i++) {
+                        SauceOnDemandCapabilities sauceOnDemandCapabilities = seleniumBrowsers.get(keyArray.getString(i));
+                        if (sauceOnDemandCapabilities != null) {
+                            caps.add(sauceOnDemandCapabilities);
+                        }
+                    }
+                }
+
+                int maxiumumSessions = service.getMaxiumumSessions(
+                        sauceConfiguration.getString(SAUCE_USER_NAME),
+                        sauceConfiguration.getString(SAUCE_ACCESS_KEY));
+                for (SauceOnDemandCapabilities cap : caps) {
+                    DesiredCapabilities c = new DesiredCapabilities(cap.asMap());
+                    c.setCapability(RegistrationRequest.MAX_INSTANCES, maxiumumSessions);
+                    request.getCapabilities().add(c);
+                }
             }
         } catch (JSONException e) {
             logger.log(Level.SEVERE, "Error parsing JSON", e);
+        } catch (SauceOnDemandRestAPIException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
         return request;
     }
@@ -349,5 +389,14 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     public void setSeleniumCapabilities(String[] seleniumCapabilities) {
         this.seleniumCapabilities = seleniumCapabilities;
+    }
+
+    public boolean isWebDriverBrowserSelected(SauceOnDemandCapabilities cap) {
+        for (String md5 : webDriverCapabilities) {
+            if (md5.equals(cap.getMD5())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

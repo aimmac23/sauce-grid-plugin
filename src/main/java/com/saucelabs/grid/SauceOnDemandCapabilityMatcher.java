@@ -23,20 +23,20 @@ public class SauceOnDemandCapabilityMatcher extends DefaultCapabilityMatcher {
         if (proxy.shouldHandleUnspecifiedCapabilities()) {
             return true;
         } else {
-            boolean result = super.matches(nodeCapability, requestedCapability);
-            if (!result) {
-                result = true;
-                //the node capability will be created using the node OS as the platform
-                //compare the capabilities, ignoring the platform
-                for (String key : requestedCapability.keySet()) {
-                    if (requestedCapability.get(key) != null && !(key.equals("platform"))) {
-                        if (!requestedCapability.get(key).equals(nodeCapability.get(key))) {
-                            result = false;
-                        }
-                    }
-                }
-            }
-            return result;
+            return super.matches(nodeCapability, requestedCapability);
+//            if (!result) {
+//                result = true;
+//                //the node capability will be created using the node OS as the platform
+//                //compare the capabilities, ignoring the platform
+//                for (String key : requestedCapability.keySet()) {
+//                    if (requestedCapability.get(key) != null && !(key.equals("platform"))) {
+//                        if (!requestedCapability.get(key).equals(nodeCapability.get(key))) {
+//                            result = false;
+//                        }
+//                    }
+//                }
+//            }
+//            return result;
         }
     }
 }

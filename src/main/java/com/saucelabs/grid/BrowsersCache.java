@@ -20,7 +20,7 @@ public class BrowsersCache {
   public SauceOnDemandCapabilities get(String md5) {
     SauceOnDemandCapabilities res = map.get(md5);
     if (res == null) {
-      throw new RuntimeException("cap missing from cache");
+      return null;
     } else {
       return res;
     }

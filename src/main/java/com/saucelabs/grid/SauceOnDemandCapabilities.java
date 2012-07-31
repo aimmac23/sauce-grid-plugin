@@ -2,6 +2,7 @@ package com.saucelabs.grid;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openqa.selenium.Platform;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.math.BigInteger;
@@ -68,6 +69,7 @@ public class SauceOnDemandCapabilities implements Comparable {
         b.append(copy(LONG_NAME));
         b.append(copy(PREFERRED_VERSION));
         b.append(copy(OS));
+        set("platform",  Platform.extractFromSysProperty((String) map.get(OS)).toString());
         String normalized = b.toString();
         String md5 = computeMD5(normalized);
         return md5;
