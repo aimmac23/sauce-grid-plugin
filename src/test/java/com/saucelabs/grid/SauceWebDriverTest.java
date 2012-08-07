@@ -22,35 +22,18 @@ public class SauceWebDriverTest {
     @BeforeMethod
     public void setUp() throws Exception {
 
-        //start hub
-
-        //start Node with Sauce Proxy, enable pass-through to SoD for non-handled capabilities
-
-
-        //start Node for Firefox
-
-
         //this.driver = new FirefoxDriver();
         DesiredCapabilities capabillities = DesiredCapabilities.firefox();
         capabillities.setCapability("version", "12");
         capabillities.setCapability("platform", Platform.XP);
-//        capabillities.setCapability("username", "rossco_9_9");
-//        capabillities.setCapability("accessKey", "44f0744c-1689-4418-af63-560303cbb37b");
-        capabillities.setCapability("webdriver.logging.profiler.enabled", "true");
         this.driver = new RemoteWebDriver(
-//                new URL("http://rossco_9_9:44f0744c-1689-4418-af63-560303cbb37b@ondemand.saucelabs.com:80/wd/hub"),
                 new URL("http://localhost:4444/wd/hub"),
-//                new URL("http://ondemand.saucelabs.com:80/wd/hub"),
                 capabillities);
     }
 
     @AfterMethod
     public void tearDown() throws Exception {
         driver.quit();
-
-        //stop nodes
-
-        //stop hub
     }
 
     @Test

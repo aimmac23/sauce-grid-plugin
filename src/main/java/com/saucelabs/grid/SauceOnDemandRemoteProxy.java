@@ -134,7 +134,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
                     request.getConfiguration().put(SAUCE_ACCESS_KEY, sauceConfiguration.getString(SAUCE_ACCESS_KEY));
                 }
                 if (sauceConfiguration.has(SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES)) {
-                    request.getConfiguration().put(SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES, sauceConfiguration.getString(SAUCE_ACCESS_KEY));
+                    request.getConfiguration().put(SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES, sauceConfiguration.getString(SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES));
                 }
                 if (sauceConfiguration.has(SAUCE_ENABLE)) {
                     request.getConfiguration().put(SAUCE_ENABLE, sauceConfiguration.getString(SAUCE_ENABLE));
@@ -370,9 +370,11 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     }
 
     public boolean isWebDriverBrowserSelected(SauceOnDemandCapabilities cap) {
-        for (String md5 : webDriverCapabilities) {
-            if (md5.equals(cap.getMD5())) {
-                return true;
+        if (webDriverCapabilities != null) {
+            for (String md5 : webDriverCapabilities) {
+                if (md5.equals(cap.getMD5())) {
+                    return true;
+                }
             }
         }
         return false;
