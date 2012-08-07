@@ -178,6 +178,17 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
         proxy.setSeleniumCapabilities(seleniumRCCapabilities);
         proxy.setShouldHandleUnspecifiedCapabilities(handleUnspecified);
         proxy.writeConfigurationToFile();
+
+
+
+        sauceRequest.getConfiguration().put(RegistrationRequest.MAX_SESSION, maxSauceSessions);
+        if (webDriverCapabilities == null && handleUnspecified) {
+            //create dummy desired capabilitiy to ensure that test slots get created
+            DesiredCapabilities c = DesiredCapabilities.firefox();
+            c.setCapability(RegistrationRequest.MAX_INSTANCES, maxSauceSessions);
+            sauceRequest.getCapabilities().add(c);
+        }
+
         SauceOnDemandRemoteProxy newProxy = new SauceOnDemandRemoteProxy(sauceRequest, getRegistry());
         getRegistry().add(newProxy);
     }
