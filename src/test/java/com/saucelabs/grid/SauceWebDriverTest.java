@@ -2,6 +2,7 @@ package com.saucelabs.grid;
 
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testng.annotations.AfterMethod;
@@ -22,7 +23,6 @@ public class SauceWebDriverTest {
     @BeforeMethod
     public void setUp() throws Exception {
 
-        //this.driver = new FirefoxDriver();
         DesiredCapabilities capabillities = DesiredCapabilities.firefox();
         capabillities.setCapability("version", "12");
         capabillities.setCapability("platform", Platform.XP);
