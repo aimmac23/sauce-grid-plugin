@@ -160,7 +160,7 @@ public class SauceOnDemandCapabilities implements Comparable {
             }
             compare = getLongName().compareTo(other.getLongName());
             if (compare != 0) {
-                return 0;
+                return compare;
             }
             DecimalFormat d = new DecimalFormat("0.0");
             try {
