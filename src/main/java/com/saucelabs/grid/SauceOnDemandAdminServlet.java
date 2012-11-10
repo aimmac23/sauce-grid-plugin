@@ -234,6 +234,9 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
 		int maxSauceSessions = 0;
 		try {
 			maxSauceSessions = service.getMaxiumumSessions(userName, accessKey);
+            if (maxSauceSessions == -1) {
+                maxSauceSessions = 100;
+            }
 		} catch (SauceOnDemandRestAPIException e) {
 			logger.log(Level.SEVERE, "Error invoking Sauce REST API", e);
 		}

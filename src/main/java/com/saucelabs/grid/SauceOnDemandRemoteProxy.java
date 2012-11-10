@@ -64,11 +64,12 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     private int maxSauceSessions;
     private String[] webDriverCapabilities;
     private String[] seleniumCapabilities;
+    private final SauceHttpClientFactory httpClientFactory;
 
 
     static {
         try {
-            SAUCE_ONDEMAND_URL = new URL("http://ondemand.saucelabs.com:80");
+            SAUCE_ONDEMAND_URL = new URL("http://rossco_9_9:44f0744c-1689-4418-af63-560303cbb37b@ondemand.saucelabs.com:4444");
         } catch (MalformedURLException e) {
             //shouldn't happen
             logger.log(Level.SEVERE, "Error constructing remote host url", e);
@@ -81,6 +82,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     public SauceOnDemandRemoteProxy(RegistrationRequest req, Registry registry) {
         super(updateDesiredCapabilities(req), registry);
+        httpClientFactory =  new SauceHttpClientFactory(this);
         //TODO include proxy id in json file
         JSONObject sauceConfiguration = readConfigurationFromFile();
         try {
@@ -92,6 +94,10 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
             }
             if (userName != null && accessKey != null) {
                 this.maxSauceSessions = service.getMaxiumumSessions(userName, accessKey);
+                if (maxSauceSessions == -1) {
+                    //this is actually infinity, but set it to 100
+                    maxSauceSessions = 100;
+                }
             }
             Object b = req.getConfiguration().get(SAUCE_ENABLE);
             if (b != null) {
@@ -170,6 +176,9 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
                 int maxiumumSessions = service.getMaxiumumSessions(
                         sauceConfiguration.getString(SAUCE_USER_NAME),
                         sauceConfiguration.getString(SAUCE_ACCESS_KEY));
+                if (maxiumumSessions == -1) {
+                    maxiumumSessions = 100;
+                }
                 for (SauceOnDemandCapabilities cap : caps) {
                     DesiredCapabilities c = new DesiredCapabilities(cap.asMap());
                     c.setCapability(RegistrationRequest.MAX_INSTANCES, maxiumumSessions);
@@ -196,7 +205,9 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     @Override
     public boolean hasCapability(Map<String, Object> requestedCapability) {
+        logger.log(Level.INFO, "Checking capability: " + requestedCapability);
         if (shouldHandleUnspecifiedCapabilities/* && browser combination is supported by sauce labs*/) {
+            logger.log(Level.INFO, "Handling capability: " + requestedCapability);
             return true;
         }
         return super.hasCapability(requestedCapability);
@@ -221,6 +232,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
             logger.log(Level.SEVERE, "Error invoking Sauce REST API", e);
         }
         if ((shouldProxySauceOnDemand && sauceAvailable) || !shouldProxySauceOnDemand) {
+            logger.log(Level.INFO, "Creating new session for: " + requestedCapability);
             return super.getNewSession(requestedCapability);
         } else {
             return null;
@@ -241,23 +253,21 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         return new SauceOnDemandRenderer(this);
     }
 
+    /**
+     * Need to ensure that Sauce proxy is handled last after all local nodes.
+     * @param o
+     * @return
+     */
     @Override
     public int compareTo(RemoteProxy o) {
         if (!(o instanceof SauceOnDemandRemoteProxy)) {
-            throw new RuntimeException("cannot mix saucelab and not saucelab ones");
+            //ensure that local nodes are listed first, so that if a local node can handle the request, it is given
+            //precedence
+            //TODO this should be configurable
+            return 1;
         } else {
-            SauceOnDemandRemoteProxy other = (SauceOnDemandRemoteProxy) o;
-
-            if (this.shouldProxySauceOnDemand) {
-                System.out.println("return -1, sslone");
-                return 1;
-            } else if (other.shouldProxySauceOnDemand) {
-                return -1;
-            } else {
-                int i = super.compareTo(o);
-                System.out.println("return normal " + i);
-                return i;
-            }
+            // there should only be one sauce proxy in use, so this branch won't get executed
+            return super.compareTo(o);
         }
     }
 
@@ -322,11 +332,12 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     @Override
     public HttpClientFactory getHttpClientFactory() {
-        return new SauceHttpClientFactory(this);
+        return httpClientFactory;
     }
 
     @Override
     public void beforeCommand(TestSession session, HttpServletRequest request, HttpServletResponse response) {
+
         if (request instanceof WebDriverRequest && request.getMethod().equals("POST")) {
             WebDriverRequest seleniumRequest = (WebDriverRequest) request;
             if (seleniumRequest.getRequestType().equals(RequestType.START_SESSION)) {
@@ -340,6 +351,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
                     desiredCapabilities.put("accessKey", this.accessKey);
                     //convert from JSON to String
                     seleniumRequest.setBody(json.toString());
+                    logger.log(Level.INFO, "Updating desired capabilities : " + desiredCapabilities);
                 } catch (JSONException e) {
                     logger.log(Level.SEVERE, "Error parsing JSON", e);
                 }

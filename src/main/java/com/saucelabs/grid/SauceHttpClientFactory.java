@@ -15,6 +15,7 @@ public class SauceHttpClientFactory extends HttpClientFactory {
     private SauceOnDemandRemoteProxy proxy;
 
     public SauceHttpClientFactory(SauceOnDemandRemoteProxy proxy) {
+        super();
         this.proxy = proxy;
     }
 
