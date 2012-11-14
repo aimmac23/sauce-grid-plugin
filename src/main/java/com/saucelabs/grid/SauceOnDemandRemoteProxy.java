@@ -25,12 +25,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 /**
@@ -69,10 +71,16 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     static {
         try {
-            SAUCE_ONDEMAND_URL = new URL("http://rossco_9_9:44f0744c-1689-4418-af63-560303cbb37b@ondemand.saucelabs.com:4444");
+            SAUCE_ONDEMAND_URL = new URL("http://ondemand.saucelabs.com:80");
+            InputStream inputStream = SauceOnDemandRemoteProxy.class.getResourceAsStream("/logging.properties");
+            if (inputStream != null) {
+                LogManager.getLogManager().readConfiguration(inputStream);
+            }
         } catch (MalformedURLException e) {
             //shouldn't happen
             logger.log(Level.SEVERE, "Error constructing remote host url", e);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -82,7 +90,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     public SauceOnDemandRemoteProxy(RegistrationRequest req, Registry registry) {
         super(updateDesiredCapabilities(req), registry);
-        httpClientFactory =  new SauceHttpClientFactory(this);
+        httpClientFactory = new SauceHttpClientFactory(this);
         //TODO include proxy id in json file
         JSONObject sauceConfiguration = readConfigurationFromFile();
         try {
@@ -179,10 +187,16 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
                 if (maxiumumSessions == -1) {
                     maxiumumSessions = 100;
                 }
-                for (SauceOnDemandCapabilities cap : caps) {
-                    DesiredCapabilities c = new DesiredCapabilities(cap.asMap());
-                    c.setCapability(RegistrationRequest.MAX_INSTANCES, maxiumumSessions);
-                    request.getCapabilities().add(c);
+                if (caps.isEmpty()) {
+                    for (DesiredCapabilities capability : request.getCapabilities()) {
+                        capability.setCapability(RegistrationRequest.MAX_INSTANCES, maxiumumSessions);
+                    }
+                } else {
+                    for (SauceOnDemandCapabilities cap : caps) {
+                        DesiredCapabilities c = new DesiredCapabilities(cap.asMap());
+                        c.setCapability(RegistrationRequest.MAX_INSTANCES, maxiumumSessions);
+                        request.getCapabilities().add(c);
+                    }
                 }
             }
         } catch (JSONException e) {
@@ -193,7 +207,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         return request;
     }
 
-    private static JSONObject readConfigurationFromFile() {
+    public static JSONObject readConfigurationFromFile() {
 
         File file = new File(SAUCE_ONDEMAND_CONFIG_FILE);
         if (file.exists()) {
@@ -255,6 +269,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     /**
      * Need to ensure that Sauce proxy is handled last after all local nodes.
+     *
      * @param o
      * @return
      */

@@ -10,6 +10,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
+import org.json.JSONObject;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.Registry;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -62,15 +63,19 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
 					registration = new URL(
 							"http://localhost:4444/grid/register");
 					logger.info("Registering the node to hub :" + registration);
+
 					BasicHttpEntityEnclosingRequest r = new BasicHttpEntityEnclosingRequest(
 							"POST", registration.toExternalForm());
 					String json = "{\"class\":\"org.openqa.grid.common.RegistrationRequest\"," +
-							"\"capabilities\":[{\"platform\":\"XP\",\"browserName\":\"firefox\",\"version\":\"12\"}]," +
+							"\"capabilities\":[" +
+                            "{\"platform\":\"ANY\",\"browserName\":\"firefox\"}," +
+                            "{\"platform\":\"ANY\",\"browserName\":\"internet explorer\"}" +
+                            "]," +
 							"\"configuration\":{\"port\":5555,\"register\":true," +
-							"\"host\":\"164.97.54.131\",\"proxy\":\"com.saucelabs.grid.SauceOnDemandRemoteProxy\"," +
-							"\"browser\":\"browserName=firefox,version=12,platform=XP\",\"maxSession\":5," +
+							"\"proxy\":\"com.saucelabs.grid.SauceOnDemandRemoteProxy\"," +
+							"\"maxSession\":100," +
 							"\"hubHost\":\"localhost\",\"role\":\"wd\",\"registerCycle\":5000,\"hubPort\":4444," +
-							"\"url\":\"http://localhost:4444\",\"remoteHost\":\"http://localhost:4444\"}" +							
+							"\"url\":\"http://localhost:4444\",\"remoteHost\":\"http://localhost:4444\"}" +
 							"}";
 					r.setEntity(new StringEntity(json));
 					HttpHost host = new HttpHost(registration.getHost(),

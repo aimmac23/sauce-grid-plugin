@@ -30,8 +30,6 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parallelized.class)
 public class WebDriverParallelTest {
 
-    public SauceOnDemandAuthentication authentication = new SauceOnDemandAuthentication();
-
     private String browser;
     private String os;
     private String version;
@@ -46,10 +44,16 @@ public class WebDriverParallelTest {
     @Parameterized.Parameters
     public static LinkedList browsersStrings() throws Exception {
         LinkedList browsers = new LinkedList();
-        browsers.add(new String[]{Platform.WINDOWS.toString(), "16", "firefox"});
-        browsers.add(new String[]{Platform.WINDOWS.toString(), "22.0.1229.94.", "chrome"});
-        browsers.add(new String[]{Platform.MAC.toString(), null, "firefox"});
-        //browsers.add(new String[]{Platform.WINDOWS.toString(), "10", "internet explorer"});
+        browsers.add(new String[]{"ANY", "16", "firefox"});
+        browsers.add(new String[]{"ANY", "15", "firefox"});
+        browsers.add(new String[]{"ANY", "14", "firefox"});
+        browsers.add(new String[]{"ANY", "13", "firefox"});
+        browsers.add(new String[]{"ANY", "12", "firefox"});
+//        browsers.add(new String[]{"ANY", "8", "internet explorer"});
+//        browsers.add(new String[]{"ANY", "7", "internet explorer"});
+//        browsers.add(new String[]{"ANY", "6", "internet explorer"});
+        //browsers.add(new String[]{Platform.MAC.toString(), null, "firefox"});
+        browsers.add(new String[]{"Windows 2012", "10", "internet explorer"});
         return browsers;
     }
 
@@ -58,11 +62,11 @@ public class WebDriverParallelTest {
     @Before
     public void setUp() throws Exception {
 
-        DesiredCapabilities capabillities = new DesiredCapabilities();
+        DesiredCapabilities capabillities = DesiredCapabilities.internetExplorer();
         capabillities.setCapability(CapabilityType.BROWSER_NAME, browser);
         if (version != null)
             capabillities.setCapability(CapabilityType.VERSION, version);
-        capabillities.setCapability(CapabilityType.PLATFORM, Platform.valueOf(os));
+        capabillities.setCapability(CapabilityType.PLATFORM, os);
 
         this.driver = new RemoteWebDriver(
                 new URL("http://localhost:4444/wd/hub"),
