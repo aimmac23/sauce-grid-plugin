@@ -1,7 +1,3 @@
-Retrieves the list of browsers from Sauce Labs.
+This project contains the source code for the Sauce OnDemand plugin for Selenium Grid.
 
-To integrate the Sauce plugin to a grid instance, perform the following steps:
-
-1. Run your hub instance by using the following arguments:
-
-   -role hub -servlets com.saucelabs.grid.SauceOnDemandAdminServlet,com.saucelabs.grid.SauceOnDemandConsoleServlet
+Detailed usage instructions can be found at https://github.com/rossrowe/sauce-grid-plugin/wiki
