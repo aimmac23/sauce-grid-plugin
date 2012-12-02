@@ -185,7 +185,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
                         sauceConfiguration.getString(SAUCE_USER_NAME),
                         sauceConfiguration.getString(SAUCE_ACCESS_KEY));
                 if (maxiumumSessions == -1) {
-                    maxiumumSessions = 100;
+                    maxiumumSessions = 20;
                 }
                 if (caps.isEmpty()) {
                     for (DesiredCapabilities capability : request.getCapabilities()) {
@@ -247,7 +247,9 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         }
         if ((shouldProxySauceOnDemand && sauceAvailable) || !shouldProxySauceOnDemand) {
             logger.log(Level.INFO, "Creating new session for: " + requestedCapability);
-            return super.getNewSession(requestedCapability);
+            TestSession session = super.getNewSession(requestedCapability);
+            logger.log(Level.INFO, "New session created for: " + requestedCapability);
+            return session;
         } else {
             return null;
         }
@@ -351,8 +353,15 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     }
 
     @Override
+    public void afterCommand(TestSession session, HttpServletRequest request, HttpServletResponse response) {
+        super.afterCommand(session, request, response);
+        logger.log(Level.INFO, "Finished executing " + request.toString());
+    }
+
+    @Override
     public void beforeCommand(TestSession session, HttpServletRequest request, HttpServletResponse response) {
 
+        logger.log(Level.INFO, "About to execute " + request.toString());
         if (request instanceof WebDriverRequest && request.getMethod().equals("POST")) {
             WebDriverRequest seleniumRequest = (WebDriverRequest) request;
             if (seleniumRequest.getRequestType().equals(RequestType.START_SESSION)) {
@@ -405,5 +414,19 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
             }
         }
         return false;
+    }
+
+    @Override
+    public int getTotalUsed() {
+        int totalUsed = super.getTotalUsed();
+        logger.log(Level.INFO, "Total Slots Used: " + totalUsed);
+        return totalUsed;
+    }
+
+    @Override
+    public boolean isBusy() {
+        boolean result =  super.isBusy();
+        logger.log(Level.INFO, "Proxy isBusy: " + result);
+        return result;
     }
 }

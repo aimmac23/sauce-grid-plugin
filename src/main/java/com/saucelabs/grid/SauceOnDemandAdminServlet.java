@@ -3,14 +3,12 @@ package com.saucelabs.grid;
 import com.saucelabs.grid.services.SauceOnDemandRestAPIException;
 import com.saucelabs.grid.services.SauceOnDemandService;
 import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
-
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
-import org.json.JSONObject;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.Registry;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -96,8 +94,8 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
 			}
 		};
 
-		Executors.newSingleThreadScheduledExecutor().schedule(selfRegister, 1,
-				TimeUnit.MINUTES);
+		Executors.newSingleThreadScheduledExecutor().schedule(selfRegister, 20,
+				TimeUnit.SECONDS);
 	}
 
 	public SauceOnDemandAdminServlet() throws SauceOnDemandRestAPIException {

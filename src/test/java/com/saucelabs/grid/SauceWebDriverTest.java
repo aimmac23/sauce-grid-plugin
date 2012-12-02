@@ -2,7 +2,6 @@ package com.saucelabs.grid;
 
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testng.annotations.AfterMethod;
@@ -23,9 +22,10 @@ public class SauceWebDriverTest {
     @BeforeMethod
     public void setUp() throws Exception {
 
-        DesiredCapabilities capabillities = DesiredCapabilities.firefox();
-        capabillities.setCapability("version", "12");
-        capabillities.setCapability("platform", Platform.XP);
+        DesiredCapabilities capabillities = DesiredCapabilities.chrome();
+        capabillities.setCapability("version", "");
+        capabillities.setCapability("platform", Platform.VISTA);
+        capabillities.setCapability("name", "Amazon Grid Test");
         this.driver = new RemoteWebDriver(
                 new URL("http://localhost:4444/wd/hub"),
                 capabillities);
