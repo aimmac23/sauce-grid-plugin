@@ -387,10 +387,14 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     @Override
     public int getMaxNumberOfConcurrentTestSessions() {
+        int result;
         if (shouldProxySauceOnDemand()) {
-            return maxSauceSessions;
+            result = maxSauceSessions;
+        } else {
+            result = super.getMaxNumberOfConcurrentTestSessions();
         }
-        return super.getMaxNumberOfConcurrentTestSessions();
+        logger.log(Level.INFO, "Maximum concurrent sessions: " + result);
+        return result;
     }
 
     public void setWebDriverCapabilities(String[] webDriverCapabilities) {
@@ -425,8 +429,10 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     @Override
     public boolean isBusy() {
-        boolean result =  super.isBusy();
+        boolean result = super.isBusy();
         logger.log(Level.INFO, "Proxy isBusy: " + result);
         return result;
     }
+
+
 }
