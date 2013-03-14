@@ -20,10 +20,16 @@ public class SauceOnDemandRenderer extends WebProxyHtmlRendererBeta {
 
     public SauceOnDemandRenderer(RemoteProxy proxy) {
         super(proxy);
-        this.sauceProxy = (SauceOnDemandRemoteProxy) proxy;
+        if (proxy instanceof SauceOnDemandRemoteProxy) {
+            this.sauceProxy = (SauceOnDemandRemoteProxy) proxy;
+        }
     }
 
     public String renderSummary() {
+        if (sauceProxy == null) {
+            return super.renderSummary();
+        }
+
         StringBuilder builder = new StringBuilder();
         builder.append("<div class='proxy'>");
         builder.append("<fieldset>");
