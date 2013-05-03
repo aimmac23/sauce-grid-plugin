@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.saucelabs</groupId>
     <artifactId>sauce-grid-plugin</artifactId>
-    <version>1.0.11-SNAPSHOT</version>
+    <version>1.0.11</version>
     <name>sauce-grid-plugin</name>
     <description>Selenium Grid plugin that provides integration with Sauce OnDemand</description>
     <scm>
