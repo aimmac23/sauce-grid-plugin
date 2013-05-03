@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author François Reynaud - Initial version of plugin
+ * @author FranÔøΩois Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionalitye
  */
 public class SauceOnDemandCapabilities implements Comparable {
@@ -153,6 +153,9 @@ public class SauceOnDemandCapabilities implements Comparable {
             throw new RuntimeException("cannot mix saucelab and not saucelab ones");
         } else {
             SauceOnDemandCapabilities other = (SauceOnDemandCapabilities) o;
+            if (other.equals(this)) {
+                return 0;
+            }
 
             int compare = getOs().compareTo(other.getOs());
             if (compare != 0) {
