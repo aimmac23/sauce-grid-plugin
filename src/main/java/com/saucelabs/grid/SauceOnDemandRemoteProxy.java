@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ import java.util.logging.Logger;
  * if the proxy is configured to 'failover' (ie. handle desired capabilities that are not handled by any other node in
  * the hub), or if the proxy is configured to respond to a specific desired capability.
  *
- * @author François Reynaud - Initial version of plugin
+ * @author FranÔøΩois Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionality
  */
 public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
@@ -52,9 +53,14 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     public static final String SAUCE_USER_NAME = "sauceUserName";
     public static final String SAUCE_ACCESS_KEY = "sauceAccessKey";
     public static final String SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES = "sauceHandleUnspecifiedCapabilities";
+    public static final String SAUCE_CONNECT = "sauceConnect";
     public static final String SAUCE_ENABLE = "sauceEnable";
     public static final String SAUCE_WEB_DRIVER_CAPABILITIES = "sauceWebDriverCapabilities";
     public static final String SAUCE_RC_CAPABILITIES = "sauceSeleniumRCCapabilities";
+    private static final String URL_FORMAT = "http://{0}:{1}";
+    private static final String SELENIUM_HOST = "seleniumHost";
+    private static final String SELENIUM_PORT = "seleniumPort";
+    private static URL DEFAULT_SAUCE_CONNECT_URL;
     private static URL SAUCE_ONDEMAND_URL;
 
     private volatile boolean sauceAvailable = false;
@@ -80,9 +86,18 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
             //shouldn't happen
             logger.log(Level.SEVERE, "Error constructing remote host url", e);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "Error constructing remote host url", e);
         }
     }
+
+    /**
+     * Defaults to ondemand.saucelabs.com
+     */
+    private String seleniumHost = "ondemand.saucelabs.com";
+    /**
+     * Defaults to 80.
+     */
+    private String seleniumPort = "80";
 
     public boolean shouldProxySauceOnDemand() {
         return shouldProxySauceOnDemand;
@@ -96,10 +111,19 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         try {
             this.userName = (String) req.getConfiguration().get(SAUCE_USER_NAME);
             this.accessKey = (String) req.getConfiguration().get(SAUCE_ACCESS_KEY);
-            String o = (String) req.getConfiguration().get(SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES);
-            if (o != null) {
-                this.shouldHandleUnspecifiedCapabilities = Boolean.valueOf(o);
+            String configHost = (String) req.getConfiguration().get(SELENIUM_HOST);
+            if (configHost != null) {
+                this.seleniumHost = configHost;
             }
+            String configPort = (String) req.getConfiguration().get(SELENIUM_PORT);
+            if (configPort != null) {
+                this.seleniumPort = configPort;
+            }
+            String handleUnspecifiedCapabilities = (String) req.getConfiguration().get(SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES);
+            if (handleUnspecifiedCapabilities != null) {
+                this.shouldHandleUnspecifiedCapabilities = Boolean.valueOf(handleUnspecifiedCapabilities);
+            }
+
             if (userName != null && accessKey != null) {
                 this.maxSauceSessions = service.getMaxiumumSessions(userName, accessKey);
                 if (maxSauceSessions == -1) {
@@ -141,6 +165,12 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         JSONObject sauceConfiguration = readConfigurationFromFile();
         try {
             if (sauceConfiguration != null) {
+                if (sauceConfiguration.has(SELENIUM_HOST)) {
+                    request.getConfiguration().put(SELENIUM_HOST, sauceConfiguration.getString(SELENIUM_HOST));
+                }
+                if (sauceConfiguration.has(SELENIUM_PORT)) {
+                    request.getConfiguration().put(SELENIUM_PORT, sauceConfiguration.getString(SELENIUM_PORT));
+                }
                 if (sauceConfiguration.has(SAUCE_USER_NAME)) {
                     request.getConfiguration().put(SAUCE_USER_NAME, sauceConfiguration.getString(SAUCE_USER_NAME));
                 }
@@ -245,6 +275,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         } catch (SauceOnDemandRestAPIException e) {
             logger.log(Level.SEVERE, "Error invoking Sauce REST API", e);
         }
+
         if ((shouldProxySauceOnDemand && sauceAvailable) || !shouldProxySauceOnDemand) {
             logger.log(Level.INFO, "Creating new session for: " + requestedCapability);
             TestSession session = super.getNewSession(requestedCapability);
@@ -312,6 +343,8 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
             jsonObject.put(SAUCE_ACCESS_KEY, getAccessKey());
             jsonObject.put(SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES, shouldHandleUnspecifiedCapabilities());
             jsonObject.put(SAUCE_WEB_DRIVER_CAPABILITIES, getWebDriverCapabilities());
+            jsonObject.put(SELENIUM_HOST, getSeleniumHost());
+            jsonObject.put(SELENIUM_PORT, getSeleniumPort());
             //TODO handle selected browsers
             FileWriter file = new FileWriter(SAUCE_ONDEMAND_CONFIG_FILE);
             file.write(jsonObject.toString());
@@ -340,6 +373,14 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
      * @return
      */
     public URL getRemoteHost() {
+        if (seleniumHost != null && seleniumPort != null) {
+            try {
+                return new URL(MessageFormat.format(URL_FORMAT, seleniumHost, seleniumPort));
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                return SAUCE_ONDEMAND_URL;
+            }
+        }
         return SAUCE_ONDEMAND_URL;
     }
 
@@ -434,5 +475,19 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         return result;
     }
 
+    public String getSeleniumHost() {
+        return seleniumHost;
+    }
 
+    public String getSeleniumPort() {
+        return seleniumPort;
+    }
+
+    public void setSeleniumHost(String seleniumHost) {
+        this.seleniumHost = seleniumHost;
+    }
+
+    public void setSeleniumPort(String seleniumPort) {
+        this.seleniumPort = seleniumPort;
+    }
 }
