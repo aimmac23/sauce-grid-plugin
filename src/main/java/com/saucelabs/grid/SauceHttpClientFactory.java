@@ -24,8 +24,8 @@ public class SauceHttpClientFactory extends HttpClientFactory {
         this.proxy = proxy;
     }
 
-    public HttpClient getGridHttpClient(int timeout) {
-        HttpClient client = super.getGridHttpClient(timeout);
+    public HttpClient getGridHttpClient(int connectionTimeout, int timeout) {
+        HttpClient client = super.getGridHttpClient(connectionTimeout, timeout);
 
         if (proxy.getRemoteHost().getUserInfo() != null) {
             // Use HTTP Basic auth

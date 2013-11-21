@@ -25,6 +25,7 @@ public class SauceOnDemandCapabilities implements Comparable {
     public static final String LONG_VERSION = "long_version";
     public static final String PREFERRED_VERSION = "preferred_version";
     public static final String OS = "os";
+    private static final String API_NAME = "api_name";
 
     private final Map<String, Object> map = new HashMap<String, Object>();
     private final JSONObject rawJSON;
@@ -64,14 +65,26 @@ public class SauceOnDemandCapabilities implements Comparable {
     private String init() throws JSONException {
         StringBuilder b = new StringBuilder();
         b.append(copy(NAME));
+
         b.append(copy(SHORT_VERSION));
         b.append(copy(LONG_VERSION));
         b.append(copy(LONG_NAME));
         b.append(copy(PREFERRED_VERSION));
         b.append(copy(OS));
-        set("platform",  Platform.extractFromSysProperty((String) map.get(OS)).toString());
+
+        String osName = (String) map.get(OS);
+        //Sauce sends Windows 2012 which is WIN8
+        if (osName.equalsIgnoreCase("windows 2012")) {
+            set("platform", Platform.WIN8.toString());
+        } else {
+            set("platform", Platform.extractFromSysProperty(osName).toString());
+        }
         String normalized = b.toString();
         String md5 = computeMD5(normalized);
+        copy(API_NAME);
+        set("browserName", (String) map.get(API_NAME));
+        set("version",  (String) map.get(SHORT_VERSION));
+
         return md5;
     }
 
