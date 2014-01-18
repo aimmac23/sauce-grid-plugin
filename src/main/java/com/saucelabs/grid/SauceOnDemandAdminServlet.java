@@ -3,6 +3,7 @@ package com.saucelabs.grid;
 import com.saucelabs.grid.services.SauceOnDemandRestAPIException;
 import com.saucelabs.grid.services.SauceOnDemandService;
 import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
+
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -17,6 +18,7 @@ import org.openqa.selenium.remote.internal.HttpClientFactory;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -136,7 +138,7 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
         SauceOnDemandRemoteProxy p = getProxy(id);
         
         if(p == null) {
-        	builder.append("<p>Saucelabs connection is not yet initialized</p>");
+        	builder.append("<p>Saucelabs connection is not yet initialized.</p>");
         	return;
         }
         builder.append("<form action='/grid/admin/SauceOnDemandAdminServlet/")
@@ -201,11 +203,11 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
         builder.append("</fieldset>");
         builder.append("</div>");
 
-        builder.append("<div class='proxy'>");
+        builder.append("<div class='proxy browserlist'>");
         builder.append("<fieldset>");
         builder.append("<legend class='proxyname' accesskey=c>Supported Browsers (WebDriver)</legend>");
         builder.append("<select name='").append(WEB_DRIVER_CAPABILITIES)
-                .append("' multiple='multiple'>");
+                .append("' multiple='multiple' class='driverTypes'>");
         for (SauceOnDemandCapabilities cap : webDriverBrowsers.getAllBrowsers()) {
 
             builder.append("<option value='").append(cap.getMD5()).append('\'');
@@ -222,11 +224,11 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
         builder.append("</fieldset>");
         builder.append("</div>");
 
-        builder.append("<div class='proxy'>");
+        builder.append("<div class='proxy browserlist'>");
         builder.append("<fieldset>");
         builder.append("<legend class='proxyname' accesskey=c>Supported Browsers (Selenium RC)</legend>");
         builder.append("<select name='").append(SELENIUM_CAPABILITIES)
-                .append("' multiple='multiple'>");
+                .append("' multiple='multiple' class='driverTypes'>");
         for (SauceOnDemandCapabilities cap : seleniumBrowsers.getAllBrowsers()) {
 
             builder.append("<option value='").append(cap.getMD5()).append("'>");
@@ -239,9 +241,17 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
 
         builder.append("<input type='hidden' name='id' value='")
                 .append(p.getId()).append("' />");
-        builder.append("<input type='submit' value='Save' />");
+        builder.append("<input type='submit' value='Save' style='display: block' />");
 
         builder.append("</form>");
+    }
+    
+    @Override
+    protected void appendExtraHeader(HttpServletRequest request,
+    		StringBuilder builder) {
+    	super.appendExtraHeader(request, builder);
+    	
+    	builder.append("<link rel=\"stylesheet\" type=\"text/css\" href=\"/grid/resources/style/adminservlet.css\" media=\"screen\" />");
     }
 
     private void updateBrowsers(HttpServletRequest req,

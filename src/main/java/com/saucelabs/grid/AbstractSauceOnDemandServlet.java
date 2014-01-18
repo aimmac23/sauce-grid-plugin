@@ -91,6 +91,9 @@ public abstract class AbstractSauceOnDemandServlet extends RegistryBasedServlet 
         builder.append("filter: alpha(opacity=40);");
         builder.append("}");
         builder.append("</style>");
+        
+        appendExtraHeader(request, builder);
+        
         builder.append("</head>");
 
         builder.append("<body>");
@@ -117,6 +120,10 @@ public abstract class AbstractSauceOnDemandServlet extends RegistryBasedServlet 
     protected abstract void renderFooter(HttpServletRequest request, StringBuilder builder);
 
     protected abstract void renderBody(HttpServletRequest request, StringBuilder builder);
+    
+    protected void appendExtraHeader(HttpServletRequest request, StringBuilder builder) {
+    	
+    }
 
 
     protected Object getHeader() {
