@@ -25,7 +25,8 @@ public class SauceOnDemandRenderer extends WebProxyHtmlRendererBeta {
         }
     }
 
-    public String renderSummary() {
+    @Override
+	public String renderSummary() {
         if (sauceProxy == null) {
             return super.renderSummary();
         }

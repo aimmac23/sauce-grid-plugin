@@ -161,7 +161,8 @@ public class SauceOnDemandCapabilities implements Comparable {
         return md5;
     }
 
-    public int compareTo(Object o) {
+    @Override
+	public int compareTo(Object o) {
         if (!(o instanceof SauceOnDemandCapabilities)) {
             throw new RuntimeException("cannot mix saucelab and not saucelab ones");
         } else {

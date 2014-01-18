@@ -149,7 +149,8 @@ public class SauceOnDemandConsoleServlet extends AbstractSauceOnDemandServlet {
         return b.toString();
     }
 
-    protected void renderBody(HttpServletRequest request, StringBuilder builder) {
+    @Override
+	protected void renderBody(HttpServletRequest request, StringBuilder builder) {
         List<String> nodes = new ArrayList<String>();
         for (RemoteProxy proxy : getRegistry().getAllProxies()) {
             HtmlRenderer beta = new SauceOnDemandRenderer(proxy);
@@ -175,7 +176,8 @@ public class SauceOnDemandConsoleServlet extends AbstractSauceOnDemandServlet {
         }
     }
 
-    protected void renderFooter(HttpServletRequest request, StringBuilder builder) {
+    @Override
+	protected void renderFooter(HttpServletRequest request, StringBuilder builder) {
         builder.append("<div class='clearfix'></div>");
 
         builder.append(getRequestQueue());

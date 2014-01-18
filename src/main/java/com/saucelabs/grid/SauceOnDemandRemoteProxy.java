@@ -372,7 +372,8 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
      *
      * @return
      */
-    public URL getRemoteHost() {
+    @Override
+	public URL getRemoteHost() {
         if (seleniumHost != null && seleniumPort != null) {
             try {
                 return new URL(MessageFormat.format(URL_FORMAT, seleniumHost, seleniumPort));

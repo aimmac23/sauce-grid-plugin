@@ -24,7 +24,8 @@ public class SauceHttpClientFactory extends HttpClientFactory {
         this.proxy = proxy;
     }
 
-    public HttpClient getGridHttpClient(int connectionTimeout, int timeout) {
+    @Override
+	public HttpClient getGridHttpClient(int connectionTimeout, int timeout) {
         HttpClient client = super.getGridHttpClient(connectionTimeout, timeout);
 
         if (proxy.getRemoteHost().getUserInfo() != null) {

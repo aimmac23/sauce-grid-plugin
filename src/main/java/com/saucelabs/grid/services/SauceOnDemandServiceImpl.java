@@ -24,7 +24,7 @@ import java.util.List;
  *
  * TODO use the Sauce REST Java API
  *
- * @author François Reynaud - Initial version of plugin
+ * @author FranÔøΩois Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionality
  */
 public class SauceOnDemandServiceImpl implements SauceOnDemandService {
@@ -45,7 +45,8 @@ public class SauceOnDemandServiceImpl implements SauceOnDemandService {
      * @return
      * @throws SauceOnDemandRestAPIException
      */
-    public boolean isSauceLabUp() throws SauceOnDemandRestAPIException {
+    @Override
+	public boolean isSauceLabUp() throws SauceOnDemandRestAPIException {
         String s = "none";
         try {
             s = executeCommand(STATUS);
@@ -56,15 +57,18 @@ public class SauceOnDemandServiceImpl implements SauceOnDemandService {
         }
     }
 
-    public List<SauceOnDemandCapabilities> getWebDriverBrowsers() throws SauceOnDemandRestAPIException {
+    @Override
+	public List<SauceOnDemandCapabilities> getWebDriverBrowsers() throws SauceOnDemandRestAPIException {
         return getBrowsers(WEB_DRIVER_BROWSERS);
     }
 
-    public List<SauceOnDemandCapabilities> getSeleniumBrowsers() throws SauceOnDemandRestAPIException {
+    @Override
+	public List<SauceOnDemandCapabilities> getSeleniumBrowsers() throws SauceOnDemandRestAPIException {
         return getBrowsers(SELENIUM_BROWSERS);
     }
 
-    public int getMaxiumumSessions(String userName, String accessKey) throws SauceOnDemandRestAPIException {
+    @Override
+	public int getMaxiumumSessions(String userName, String accessKey) throws SauceOnDemandRestAPIException {
         String json = "none";
         try {
             SauceREST sauceRest = new SauceREST(userName, accessKey);
