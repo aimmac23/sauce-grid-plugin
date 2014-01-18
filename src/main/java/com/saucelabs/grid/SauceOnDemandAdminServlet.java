@@ -134,6 +134,11 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
     protected void renderBody(HttpServletRequest request, StringBuilder builder) {
         String id = request.getParameter("id");
         SauceOnDemandRemoteProxy p = getProxy(id);
+        
+        if(p == null) {
+        	builder.append("<p>Saucelabs connection is not yet initialized</p>");
+        	return;
+        }
         builder.append("<form action='/grid/admin/SauceOnDemandAdminServlet/")
                 .append(UPDATE_BROWSERS).append("' method='POST'>");
         builder.append("<div class='proxy'>");
