@@ -1,9 +1,8 @@
 package com.saucelabs.grid;
 
-import org.openqa.grid.internal.utils.DefaultCapabilityMatcher;
-import org.openqa.selenium.Platform;
-
 import java.util.Map;
+
+import org.openqa.grid.internal.utils.DefaultCapabilityMatcher;
 
 /**
  * Handles the matching of requested capabilities with those handled by the Sauce Node.

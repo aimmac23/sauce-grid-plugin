@@ -1,29 +1,27 @@
 package com.saucelabs.grid;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.fail;
+
 import java.io.FileNotFoundException;
 import java.net.URL;
 
-import com.saucelabs.common.SauceOnDemandAuthentication;
-import com.saucelabs.grid.SauceOnDemandRemoteProxy;
-import com.saucelabs.saucerest.SauceREST;
 import org.json.JSONObject;
 import org.openqa.grid.common.GridRole;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.utils.SelfRegisteringRemote;
 import org.openqa.grid.web.Hub;
 import org.openqa.selenium.Platform;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import com.saucelabs.grid.utils.TestHelper;
-import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.fail;
+import com.saucelabs.common.SauceOnDemandAuthentication;
+import com.saucelabs.grid.utils.TestHelper;
+import com.saucelabs.saucerest.SauceREST;
 
 @Test(groups = {"slow"})
 public class SauceOnDemandRemoteProxyTest {
