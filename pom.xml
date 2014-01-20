@@ -1,19 +1,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.saucelabs</groupId>
+    <groupId>com.mooo.aimmac23</groupId>
     <artifactId>sauce-grid-plugin</artifactId>
     <version>1.1.1-SNAPSHOT</version>
     <name>sauce-grid-plugin</name>
     <description>Selenium Grid plugin that provides integration with Sauce OnDemand</description>
     <scm>
-        <connection>scm:git:git://github.com/rossrowe/sauce-grid-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:rossrowe/sauce-grid-plugin.git</developerConnection>
-        <url>git@github.com:rossrowe/sauce-grid-plugin.git</url>
+        <connection>scm:git:git://github.com/aimmac23/sauce-grid-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:aimmac23/sauce-grid-plugin.git</developerConnection>
+        <url>git@github.com:aimmac23/sauce-grid-plugin.git</url>
     </scm>
     <distributionManagement>
         <repository>
-            <id>cloudbees-private-release-repository</id>
-            <url>dav:https://repository-saucelabs.forge.cloudbees.com/release</url>
+            <!-- Login should be required for upload - if more than one person wants to do it, perhaps
+		 time to find a proper repository -->
+            <id>aimmac23.mooo.com-public-repository</id>
+            <url>dav:https://aimmac23.mooo.com/public/maven-repository</url>
         </repository>
     </distributionManagement>
     <dependencies>
