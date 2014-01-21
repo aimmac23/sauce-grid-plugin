@@ -13,13 +13,10 @@ public class SauceLabAdminServletTests {
 
   private Hub hub;
 
-
-
   @BeforeClass(alwaysRun = false)
   public void prepare() throws Exception {
     hub = TestHelper.getHub(4444);
     registerSauceLabProxy();
-
   }
 
   @Test
