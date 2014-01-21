@@ -5,7 +5,7 @@ import com.saucelabs.grid.SauceOnDemandCapabilities;
 import java.util.List;
 
 /**
- * @author François Reynaud - Initial version of plugin
+ * @author Fran¬çois Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionality
  */
 public interface SauceOnDemandService {

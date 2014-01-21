@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Fran�ois Reynaud - Initial version of plugin
+ * @author Franois Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionalitye
  */
 public class SauceOnDemandCapabilities implements Comparable {

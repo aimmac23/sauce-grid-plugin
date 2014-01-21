@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  * if the proxy is configured to 'failover' (ie. handle desired capabilities that are not handled by any other node in
  * the hub), or if the proxy is configured to respond to a specific desired capability.
  *
- * @author Fran�ois Reynaud - Initial version of plugin
+ * @author Franois Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionality
  */
 public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {

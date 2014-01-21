@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  * Servlet which allows the user to enter the configuration details for the
  * Sauce proxy.
  *
- * @author Fran�ois Reynaud - Initial version of plugin
+ * @author Franois Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionality
  */
 public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {

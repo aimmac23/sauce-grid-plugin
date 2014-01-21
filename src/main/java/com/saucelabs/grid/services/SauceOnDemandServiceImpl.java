@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  *
  * TODO use the Sauce REST Java API
  *
- * @author Fran�ois Reynaud - Initial version of plugin
+ * @author Franois Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionality
  */
 public class SauceOnDemandServiceImpl implements SauceOnDemandService {

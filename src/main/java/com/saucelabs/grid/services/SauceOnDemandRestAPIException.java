@@ -1,7 +1,7 @@
 package com.saucelabs.grid.services;
 
 /**
- * @author François Reynaud - Initial version of plugin
+ * @author Fran¬çois Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionality
  */
 public class SauceOnDemandRestAPIException extends Exception {
