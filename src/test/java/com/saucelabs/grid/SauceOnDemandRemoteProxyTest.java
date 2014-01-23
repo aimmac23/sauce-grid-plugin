@@ -8,36 +8,35 @@ import java.io.FileNotFoundException;
 import java.net.URL;
 
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-import org.openqa.grid.common.GridRole;
-import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.utils.SelfRegisteringRemote;
-import org.openqa.grid.web.Hub;
 import org.openqa.selenium.Platform;
+import org.openqa.selenium.net.PortProber;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.saucelabs.common.SauceOnDemandAuthentication;
-import com.saucelabs.grid.utils.TestHelper;
 import com.saucelabs.saucerest.SauceREST;
 
-public class SauceOnDemandRemoteProxyTest {
+/**
+ * To get this test to pass you need to have a file in your home directory 
+ * called ".sauce-ondemand", containing two properties: "username" and "key"
+ *
+ */
+public class SauceOnDemandRemoteProxyTest extends AbstractSeleniumGridTest {
 
     private SauceOnDemandAuthentication authentication = new SauceOnDemandAuthentication();
 
-    private Hub hub;
-
-    @Before
-    public void prepare() throws Exception {
-        this.hub = TestHelper.getHub();
-    }
-
+    /**
+     * I have no idea what this is meant to be testing
+     * @throws Exception
+     */
     @Test(expected = FileNotFoundException.class)
+    @Ignore
     public void localCapabilities() throws Exception {
-        SelfRegisteringRemote remote = createSauceNode(DesiredCapabilities.firefox());
-        registerNode(remote);
+        SelfRegisteringRemote remote = createSauceNode(PortProber.findFreePort(), DesiredCapabilities.firefox());
+        startNode(remote);
         RemoteWebDriver driver = null;
         try {
             DesiredCapabilities ff = DesiredCapabilities.firefox();
@@ -61,11 +60,11 @@ public class SauceOnDemandRemoteProxyTest {
 
     @Test()
     public void failoverToSauce() throws Exception {
-        SelfRegisteringRemote remote = createSauceNode(DesiredCapabilities.firefox());
+        SelfRegisteringRemote remote = createSauceNode(PortProber.findFreePort(), DesiredCapabilities.firefox());
         remote.getConfiguration().put(SauceOnDemandRemoteProxy.SAUCE_USER_NAME, authentication.getUsername());
         remote.getConfiguration().put(SauceOnDemandRemoteProxy.SAUCE_ACCESS_KEY, authentication.getAccessKey());
         remote.getConfiguration().put(SauceOnDemandRemoteProxy.SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES, true);
-        registerNode(remote);
+        startNode(remote);
         RemoteWebDriver driver = null;
         String sessionId = null;
         try {
@@ -96,11 +95,11 @@ public class SauceOnDemandRemoteProxyTest {
         capabillities.setCapability("version", "12");
         capabillities.setCapability("platform", Platform.XP);
 
-        SelfRegisteringRemote remote = createSauceNode(capabillities);
+        SelfRegisteringRemote remote = createSauceNode(PortProber.findFreePort(), capabillities);
         remote.getConfiguration().put(SauceOnDemandRemoteProxy.SAUCE_USER_NAME, authentication.getUsername());
         remote.getConfiguration().put(SauceOnDemandRemoteProxy.SAUCE_ACCESS_KEY, authentication.getAccessKey());
         remote.getConfiguration().put(SauceOnDemandRemoteProxy.SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES, false);
-        registerNode(remote);
+        startNode(remote);
         RemoteWebDriver driver = null;
         String sessionId = null;
         try {
@@ -126,12 +125,8 @@ public class SauceOnDemandRemoteProxyTest {
         }
     }
 
-    private void registerNode(SelfRegisteringRemote remote) throws Exception {
-        remote.startRemoteServer();
-        remote.sendRegistrationRequest();
-    }
 
-    private SelfRegisteringRemote createSauceNode(DesiredCapabilities desiredCapabilities) throws Exception {
+    /*private SelfRegisteringRemote createSauceNode(DesiredCapabilities desiredCapabilities) throws Exception {
         SelfRegisteringRemote remote = TestHelper.getRemoteWithoutCapabilities(hub.getUrl(), GridRole.NODE);
         if (desiredCapabilities != null) {
             remote.addBrowser(desiredCapabilities, 2);
@@ -142,11 +137,6 @@ public class SauceOnDemandRemoteProxyTest {
                 .put(RegistrationRequest.PROXY_CLASS, "com.saucelabs.grid.SauceOnDemandRemoteProxy");
         return remote;
 
-    }
-
-    @After
-    public void stop() throws Exception {
-        hub.stop();
-    }
+    }*/
 
 }

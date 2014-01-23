@@ -7,33 +7,50 @@ import java.net.URL;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.grid.internal.utils.SelfRegisteringRemote;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.net.PortProber;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 /**
  * @author Ross Rowe
  */
-public class SauceWebDriverTest {
+public class SauceWebDriverTest extends AbstractSeleniumGridTest {
 
     private WebDriver driver;
+	private SelfRegisteringRemote sauceNode;
 
     @Before
     public void setUp() throws Exception {
+    	
+    	// XXX: deliberately specifying IE here. Should fix the configuration later. 
+    	sauceNode = createSauceNode(PortProber.findFreePort(), DesiredCapabilities.internetExplorer());
+    	sauceNode.getConfiguration().put(SauceOnDemandRemoteProxy.SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES, "true");
+    	startNode(sauceNode);
 
         DesiredCapabilities capabillities = DesiredCapabilities.firefox();
         capabillities.setCapability("version", "24");
         capabillities.setCapability("platform", Platform.WIN8);
         capabillities.setCapability("name", "Amazon Grid Test");
         this.driver = new RemoteWebDriver(
-                new URL("http://localhost:4444/wd/hub"),
+                new URL(String.format("http://localhost:%s/wd/hub", HUB_PORT)),
                 capabillities);
     }
 
-    @After
+    @Override
+	@After
     public void tearDown() throws Exception {
-        driver.quit();
+    	if(driver != null) {
+    		driver.quit();	
+    	}
+        
+    	if(sauceNode != null) {
+    		sauceNode.stopRemoteServer();	
+    	}
+        
+        super.tearDown();
     }
 
     @Test

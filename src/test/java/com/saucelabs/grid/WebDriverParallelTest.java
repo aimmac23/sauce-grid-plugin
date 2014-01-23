@@ -11,6 +11,7 @@ import java.util.LinkedList;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -73,6 +74,7 @@ public class WebDriverParallelTest {
     }
 
     @Test
+    @Ignore
     public void webDriver() throws Exception {
         System.out.println("Running: " + os + " " + browser + " " + version);
         driver.get("http://www.amazon.com/");
