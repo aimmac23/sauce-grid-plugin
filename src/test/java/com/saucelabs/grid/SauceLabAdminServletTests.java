@@ -1,19 +1,21 @@
 package com.saucelabs.grid;
 
 import com.saucelabs.grid.SauceOnDemandRemoteProxy;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.openqa.grid.common.GridRole;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.utils.SelfRegisteringRemote;
 import org.openqa.grid.web.Hub;
+
 import com.saucelabs.grid.utils.TestHelper;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 public class SauceLabAdminServletTests {
 
   private Hub hub;
 
-  @BeforeClass(alwaysRun = false)
+  @Before
   public void prepare() throws Exception {
     hub = TestHelper.getHub(4444);
     registerSauceLabProxy();

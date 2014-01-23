@@ -1,5 +1,7 @@
 package com.saucelabs.grid;
 
+import static org.junit.Assert.assertEquals;
+
 import com.thoughtworks.selenium.DefaultSelenium;
 
 import org.junit.After;
@@ -10,10 +12,9 @@ import org.openqa.grid.internal.utils.SelfRegisteringRemote;
 import org.openqa.selenium.net.PortProber;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import static org.testng.Assert.assertEquals;
-
 /**
  * @author Ross Rowe
+ * @author Alasdair Macmillan - made it start up its own grid
  */
 public class SeleniumRCTest extends AbstractSeleniumGridTest {
 

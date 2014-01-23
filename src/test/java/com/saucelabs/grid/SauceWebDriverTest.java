@@ -1,16 +1,16 @@
 package com.saucelabs.grid;
 
+import static junit.framework.Assert.assertEquals;
+
+import java.net.URL;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import java.net.URL;
-
-import static junit.framework.Assert.assertEquals;
 
 /**
  * @author Ross Rowe
@@ -19,7 +19,7 @@ public class SauceWebDriverTest {
 
     private WebDriver driver;
 
-    @BeforeMethod
+    @Before
     public void setUp() throws Exception {
 
         DesiredCapabilities capabillities = DesiredCapabilities.firefox();
@@ -31,7 +31,7 @@ public class SauceWebDriverTest {
                 capabillities);
     }
 
-    @AfterMethod
+    @After
     public void tearDown() throws Exception {
         driver.quit();
     }

@@ -8,6 +8,9 @@ import java.io.FileNotFoundException;
 import java.net.URL;
 
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.openqa.grid.common.GridRole;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.utils.SelfRegisteringRemote;
@@ -15,27 +18,23 @@ import org.openqa.grid.web.Hub;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 import com.saucelabs.common.SauceOnDemandAuthentication;
 import com.saucelabs.grid.utils.TestHelper;
 import com.saucelabs.saucerest.SauceREST;
 
-@Test(groups = {"slow"})
 public class SauceOnDemandRemoteProxyTest {
 
     private SauceOnDemandAuthentication authentication = new SauceOnDemandAuthentication();
 
     private Hub hub;
 
-    @BeforeClass(alwaysRun = false)
+    @Before
     public void prepare() throws Exception {
         this.hub = TestHelper.getHub();
     }
 
-    @Test(expectedExceptions = FileNotFoundException.class)
+    @Test(expected = FileNotFoundException.class)
     public void localCapabilities() throws Exception {
         SelfRegisteringRemote remote = createSauceNode(DesiredCapabilities.firefox());
         registerNode(remote);
@@ -145,7 +144,7 @@ public class SauceOnDemandRemoteProxyTest {
 
     }
 
-    @AfterClass(alwaysRun = false)
+    @After
     public void stop() throws Exception {
         hub.stop();
     }

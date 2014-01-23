@@ -1,10 +1,12 @@
 package com.saucelabs.grid;
 
+import junit.framework.Assert;
+
 import com.saucelabs.grid.SauceOnDemandCapabilities;
+
 import org.json.JSONException;
+import org.junit.Test;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.testng.Assert;
-import org.testng.annotations.Test;
 
 public class ModelTests {
 
@@ -56,7 +58,7 @@ public class ModelTests {
 
 
 
-  @Test(expectedExceptions = {JSONException.class})
+  @Test(expected = JSONException.class)
   public void sauceLabCapabilityInvalid() throws JSONException {
     new SauceOnDemandCapabilities(stringCapabilitiesInvalid);
   }

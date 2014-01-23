@@ -2,12 +2,14 @@ package com.saucelabs.grid;
 
 import java.util.List;
 
+import junit.framework.Assert;
+
+import org.junit.Test;
+
 import com.saucelabs.grid.services.SauceOnDemandRestAPIException;
 import com.saucelabs.grid.services.SauceOnDemandService;
 import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
 import com.saucelabs.grid.utils.SauceLabServiceHardcodedResponses;
-import org.testng.Assert;
-import org.testng.annotations.Test;
 
 public class SauceLabServiceTests {
 
@@ -15,20 +17,20 @@ public class SauceLabServiceTests {
   private SauceOnDemandService mockOne = new SauceLabServiceHardcodedResponses();
 
   // for now, as status doesn't seem implemented.
-  @Test(groups = {"manual"}, expectedExceptions = {SauceOnDemandRestAPIException.class})
+  @Test(expected = SauceOnDemandRestAPIException.class)
   public void testStatusAgainstSauceLab() throws SauceOnDemandRestAPIException {
     boolean up = realOne.isSauceLabUp();
     Assert.assertTrue(up);
   }
 
-  @Test(groups = {"manual"})
+  @Test
   public void testBrowsersAgainstSauceLab() throws SauceOnDemandRestAPIException {
     List<SauceOnDemandCapabilities> caps = realOne.getWebDriverBrowsers();
     Assert.assertTrue(caps.size() > 50);
   }
 
   // for now, as status doesn't seem implemented.
-  @Test(expectedExceptions = {SauceOnDemandRestAPIException.class})
+  @Test(expected = SauceOnDemandRestAPIException.class)
   public void testStatus() throws SauceOnDemandRestAPIException {
     boolean up = mockOne.isSauceLabUp();
     Assert.assertTrue(up);
