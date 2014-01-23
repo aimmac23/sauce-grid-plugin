@@ -1,6 +1,7 @@
 package com.saucelabs.grid;
 
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,6 +37,10 @@ import com.saucelabs.grid.utils.TestHelper;
  *
  */
 public abstract class AbstractSeleniumGridTest {
+	
+	public static final String AMAZON_TITLE = 
+			"Amazon.com: Online Shopping for Electronics, Apparel, Computers, Books, DVDs & more";
+
 	
 	public static final int HUB_PORT = 7777;
 	protected Hub hub; 
@@ -112,6 +117,13 @@ public abstract class AbstractSeleniumGridTest {
 		Assert.fail("Selenium node is not handling session " + sessionKey);
 	}
 	
+	protected void assertNodeHandlingNoSessions(int port) throws JSONException {
+		JSONObject json = getJSONFromURL(new HttpHost("127.0.0.1", port),
+				"/wd/hub/sessions");
+		JSONArray sessions = json.getJSONArray("value");
+		assertEquals(0, sessions.length());
+	}
+	
     
     protected RegistrationRequest buildRegistrationRequest(int nodePort) {
         RegistrationRequest req = RegistrationRequest.build("-role", "node" , "-host", "localhost");
@@ -138,11 +150,24 @@ public abstract class AbstractSeleniumGridTest {
     	request.addDesiredCapability(capabilities);
     	
     	SelfRegisteringRemote node = new SelfRegisteringRemote(request);
-    	node.startRemoteServer();
-    	
-    	node.startRegistrationProcess();
-    	
+
     	return node;
+    }
+    
+    protected void startNode(SelfRegisteringRemote node) throws Exception {
+    	node.startRemoteServer();
+    	node.sendRegistrationRequest();
+    }
+    
+    protected SelfRegisteringRemote createSauceNode(int port, DesiredCapabilities capabilities) throws Exception {
+    	SelfRegisteringRemote node = createSeleniumNode(port, capabilities);
+    	
+    	node.getConfiguration().put(SauceOnDemandRemoteProxy.SAUCE_ENABLE, true);
+    	node.getConfiguration()
+        .put(RegistrationRequest.PROXY_CLASS, "com.saucelabs.grid.SauceOnDemandRemoteProxy");
+        
+    	return node;
+    	
     }
 
 }

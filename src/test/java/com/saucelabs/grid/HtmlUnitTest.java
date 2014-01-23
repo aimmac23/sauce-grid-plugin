@@ -15,9 +15,6 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 public class HtmlUnitTest extends AbstractSeleniumGridTest {
 	
-	private static final String AMAZON_TITLE = 
-			"Amazon.com: Online Shopping for Electronics, Apparel, Computers, Books, DVDs & more";
-
     private RemoteWebDriver driver;
 	private SelfRegisteringRemote node;
 	private int nodePort;
@@ -27,6 +24,7 @@ public class HtmlUnitTest extends AbstractSeleniumGridTest {
     	nodePort = PortProber.findFreePort();
     	
     	node = createSeleniumNode(nodePort, DesiredCapabilities.htmlUnit());
+    	startNode(node);
     	
     	DesiredCapabilities capabilities = DesiredCapabilities.htmlUnit();
         this.driver = new RemoteWebDriver(
