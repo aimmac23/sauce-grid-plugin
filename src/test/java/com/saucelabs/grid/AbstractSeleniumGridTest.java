@@ -1,10 +1,12 @@
 package com.saucelabs.grid;
 
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
+import junit.framework.Assert;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -17,7 +19,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.common.exception.GridException;
+import org.openqa.grid.internal.utils.SelfRegisteringRemote;
 import org.openqa.grid.web.Hub;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.internal.HttpClientFactory;
 
@@ -87,17 +91,25 @@ public abstract class AbstractSeleniumGridTest {
 		    return new JSONObject(s.toString());
 	  }
 	  
-	protected void assertNodeHandledSession(RemoteWebDriver driver, int port) throws JSONException {
+	protected void assertNodeHandlingSession(RemoteWebDriver driver, int port) throws JSONException {
 		String sessionKey = driver.getSessionId().toString();
 
 		JSONObject json = getJSONFromURL(new HttpHost("127.0.0.1", port),
 				"/wd/hub/sessions");
 
 		JSONArray sessions = json.getJSONArray("value");
-		assertEquals(sessions.length(), 1);
+		assertTrue(sessions.length() > 0);
+		
+		for(int i = 0; i < sessions.length(); i++) {
+			JSONObject sessionInfo = sessions.getJSONObject(i);
+			
+			// found it
+			if(sessionKey.equals(sessionInfo.getString("id"))) {
+				return;
+			}
+		}
 
-		JSONObject sessionInfo = sessions.getJSONObject(0);
-		assertEquals(sessionKey, sessionInfo.getString("id"));
+		Assert.fail("Selenium node is not handling session " + sessionKey);
 	}
 	
     
@@ -113,12 +125,24 @@ public abstract class AbstractSeleniumGridTest {
                 "http://" + req.getConfiguration().get(RegistrationRequest.HOST) + ":"
                     + req.getConfiguration().get(RegistrationRequest.PORT);
             req.getConfiguration().put(RegistrationRequest.REMOTE_HOST, url);
-        
+                    
         // we don't want silly defaults
         req.getCapabilities().clear();
         
         return req;
 
+    }
+    
+    protected SelfRegisteringRemote createSeleniumNode(int port, DesiredCapabilities capabilities) throws Exception {
+    	RegistrationRequest request = buildRegistrationRequest(port);
+    	request.addDesiredCapability(capabilities);
+    	
+    	SelfRegisteringRemote node = new SelfRegisteringRemote(request);
+    	node.startRemoteServer();
+    	
+    	node.startRegistrationProcess();
+    	
+    	return node;
     }
 
 }

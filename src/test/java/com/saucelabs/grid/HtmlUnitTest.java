@@ -8,13 +8,15 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.utils.SelfRegisteringRemote;
 import org.openqa.selenium.net.PortProber;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 public class HtmlUnitTest extends AbstractSeleniumGridTest {
+	
+	private static final String AMAZON_TITLE = 
+			"Amazon.com: Online Shopping for Electronics, Apparel, Computers, Books, DVDs & more";
 
     private RemoteWebDriver driver;
 	private SelfRegisteringRemote node;
@@ -23,13 +25,8 @@ public class HtmlUnitTest extends AbstractSeleniumGridTest {
     @Before
     public void setUp() throws Exception {
     	nodePort = PortProber.findFreePort();
-    	RegistrationRequest request = buildRegistrationRequest(nodePort);
-    	request.addDesiredCapability(DesiredCapabilities.htmlUnit());
     	
-    	node = new SelfRegisteringRemote(request);
-    	node.startRemoteServer();
-    	
-    	node.startRegistrationProcess();
+    	node = createSeleniumNode(nodePort, DesiredCapabilities.htmlUnit());
     	
     	DesiredCapabilities capabilities = DesiredCapabilities.htmlUnit();
         this.driver = new RemoteWebDriver(
@@ -42,11 +39,9 @@ public class HtmlUnitTest extends AbstractSeleniumGridTest {
     public void amazonTest() throws JSONException {
     	driver.get("http://www.amazon.com/");
     	
-        assertEquals(
-                "Amazon.com: Online Shopping for Electronics, Apparel, Computers, Books, DVDs & more",
-                driver.getTitle());
+        assertEquals(AMAZON_TITLE, driver.getTitle());
         
-        assertNodeHandledSession(driver, nodePort);
+        assertNodeHandlingSession(driver, nodePort);
     }
     
     
