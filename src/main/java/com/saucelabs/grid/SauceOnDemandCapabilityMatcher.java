@@ -20,6 +20,10 @@ public class SauceOnDemandCapabilityMatcher extends DefaultCapabilityMatcher {
 
     @Override
     public boolean matches(Map<String, Object> nodeCapability, Map<String, Object> requestedCapability) {
+    	if(!proxy.isAllowedToProcessRequest(requestedCapability)) {
+    		return false;
+    	}
+    	
         if (proxy.shouldHandleUnspecifiedCapabilities()) {
             return true;
         } else {

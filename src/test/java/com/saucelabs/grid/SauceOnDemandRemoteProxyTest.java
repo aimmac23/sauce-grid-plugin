@@ -12,6 +12,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.grid.internal.utils.SelfRegisteringRemote;
 import org.openqa.selenium.Platform;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.net.PortProber;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -123,6 +124,34 @@ public class SauceOnDemandRemoteProxyTest extends AbstractSeleniumGridTest {
                 assertNotNull("Unable to parse JSON", jsonObject);
             }
         }
+    }
+    
+    @Test(expected = WebDriverException.class, timeout = 30000)
+    public void testRefusalToUseSauce() throws Exception {
+        SelfRegisteringRemote remote = createSauceNode(PortProber.findFreePort(), DesiredCapabilities.firefox());
+        startNode(remote);
+        
+        DesiredCapabilities capabilities = DesiredCapabilities.firefox();
+        capabilities.setCapability(SauceOnDemandRemoteProxy.SAUCE_REQUEST_ALLOWED, "false");
+        
+   	 	RemoteWebDriver driver = null;
+
+        try {
+			driver = new RemoteWebDriver(
+                     new URL(String.format("http://localhost:%s/wd/hub", 
+                     		AbstractSeleniumGridTest.HUB_PORT)), capabilities);
+        }
+        finally {
+        	if(driver != null) {
+        		driver.quit();
+        	}
+        	
+        	if(remote != null) {
+        		remote.stopRemoteServer();
+        	}
+        }
+       
+        
     }
 
 

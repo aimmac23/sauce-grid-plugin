@@ -3,6 +3,7 @@ package com.saucelabs.grid;
 import com.saucelabs.grid.services.SauceOnDemandRestAPIException;
 import com.saucelabs.grid.services.SauceOnDemandService;
 import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +23,7 @@ import org.openqa.selenium.remote.internal.HttpClientFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -57,6 +59,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     public static final String SAUCE_ENABLE = "sauceEnable";
     public static final String SAUCE_WEB_DRIVER_CAPABILITIES = "sauceWebDriverCapabilities";
     public static final String SAUCE_RC_CAPABILITIES = "sauceSeleniumRCCapabilities";
+    public static final String SAUCE_REQUEST_ALLOWED = "isSauceRequestAllowed";
     private static final String URL_FORMAT = "http://{0}:{1}";
     private static final String SELENIUM_HOST = "seleniumHost";
     private static final String SELENIUM_PORT = "seleniumPort";
@@ -250,6 +253,13 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     @Override
     public boolean hasCapability(Map<String, Object> requestedCapability) {
         logger.log(Level.INFO, "Checking capability: " + requestedCapability);
+        
+        // this call is also in SauceOnDemandCapabilityMatcher, but for some reason the matcher is not
+        // used to sanity check that the request can be fulfilled.
+        if(!isAllowedToProcessRequest(requestedCapability)) {
+        	return false;
+        }
+        
         if (shouldHandleUnspecifiedCapabilities/* && browser combination is supported by sauce labs*/) {
             logger.log(Level.INFO, "Handling capability: " + requestedCapability);
             return true;
@@ -277,9 +287,15 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         }
 
         if ((shouldProxySauceOnDemand && sauceAvailable) || !shouldProxySauceOnDemand) {
-            logger.log(Level.INFO, "Creating new session for: " + requestedCapability);
+            logger.log(Level.INFO, "Attempting to create new session for: " + requestedCapability);
             TestSession session = super.getNewSession(requestedCapability);
-            logger.log(Level.INFO, "New session created for: " + requestedCapability);
+            if(session != null) {
+            	logger.log(Level.INFO, "New session created for: " + requestedCapability);	
+            }
+            else {
+            	logger.log(Level.INFO, "No session created for request: " + requestedCapability);
+            }
+            
             return session;
         } else {
             return null;
@@ -447,6 +463,25 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         }
     	
     }
+    
+    /**
+     * Disallow Sauce Proxying if the requester specifically says no. This
+     * allows us to still use the Selenium Grid as a standard grid, which can
+     * be useful if we cannot route SauceLabs requests to the webapp being tested.
+     *  
+     * @param requestedCapability
+     * @return
+     */
+	public boolean isAllowedToProcessRequest(
+			Map<String, Object> requestedCapability) {
+		if(requestedCapability.containsKey(SAUCE_REQUEST_ALLOWED)) {
+			Object isSauceAllowed = requestedCapability.get(SAUCE_REQUEST_ALLOWED);
+			if(isSauceAllowed != null && "false".equals(isSauceAllowed.toString().toLowerCase())) {
+				return false;
+			}
+		}
+		return true;
+	}
 
     public void setWebDriverCapabilities(String[] webDriverCapabilities) {
         this.webDriverCapabilities = webDriverCapabilities;
