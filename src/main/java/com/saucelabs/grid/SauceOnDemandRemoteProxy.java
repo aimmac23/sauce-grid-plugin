@@ -407,22 +407,8 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         if (request instanceof WebDriverRequest && request.getMethod().equals("POST")) {
             WebDriverRequest seleniumRequest = (WebDriverRequest) request;
             if (seleniumRequest.getRequestType().equals(RequestType.START_SESSION)) {
-                String body = seleniumRequest.getBody();
-                //convert from String to JSON
-                try {
-                    JSONObject json = new JSONObject(body);
-                    //add username/accessKey
-                    JSONObject desiredCapabilities = json.getJSONObject("desiredCapabilities");
-                    desiredCapabilities.put("username", this.userName);
-                    desiredCapabilities.put("accessKey", this.accessKey);
-                    //convert from JSON to String
-                    seleniumRequest.setBody(json.toString());
-                    logger.log(Level.INFO, "Updating desired capabilities : " + desiredCapabilities);
-                } catch (JSONException e) {
-                    logger.log(Level.SEVERE, "Error parsing JSON", e);
-                }
+            	applySauceLabsCredentials(seleniumRequest);
             }
-
         }
         super.beforeCommand(session, request, response);
     }
@@ -437,6 +423,29 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         }
         logger.log(Level.INFO, "Maximum concurrent sessions: " + result);
         return result;
+    }
+    
+    protected void applySauceLabsCredentials(WebDriverRequest request) {
+    	String body = request.getBody();
+        //convert from String to JSON
+        try {
+            JSONObject json = new JSONObject(body);
+            //add username/accessKey
+            JSONObject desiredCapabilities = json.getJSONObject("desiredCapabilities");
+            if(desiredCapabilities.opt("username") == null) {
+                desiredCapabilities.put("username", this.userName);
+            }
+            if(desiredCapabilities.opt("accessKey") == null) {
+            	desiredCapabilities.put("accessKey", this.accessKey);	
+            }
+            
+            //convert from JSON to String
+            request.setBody(json.toString());
+            logger.log(Level.INFO, "Updating desired capabilities : " + desiredCapabilities);
+        } catch (JSONException e) {
+            logger.log(Level.SEVERE, "Error parsing JSON", e);
+        }
+    	
     }
 
     public void setWebDriverCapabilities(String[] webDriverCapabilities) {
