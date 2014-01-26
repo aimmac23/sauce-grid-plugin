@@ -172,7 +172,7 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
 
         builder.append("<div>");
                         builder.append("<label for='").append(SELENIUM_PORT)
-                                .append("'>Selenium Host </label> : <input type='text' name='")
+                                .append("'>Selenium Port </label> : <input type='text' name='")
                                 .append(SELENIUM_PORT).append("' id='")
                                 .append(SELENIUM_PORT).append("' value='")
                                 .append(p.getSeleniumPort()).append("' />");
