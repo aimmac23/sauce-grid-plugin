@@ -1,22 +1,5 @@
 package com.saucelabs.grid.services;
 
-import com.google.common.base.Throwables;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.saucelabs.grid.Helper;
-import com.saucelabs.grid.SauceOnDemandCapabilities;
-import com.saucelabs.saucerest.SauceREST;
-
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicHttpRequest;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
@@ -24,6 +7,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHttpRequest;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.google.common.base.Throwables;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.saucelabs.grid.Helper;
+import com.saucelabs.grid.SauceOnDemandCapabilities;
+import com.saucelabs.saucerest.SauceREST;
 
 /**
  *
@@ -106,7 +105,7 @@ public class SauceOnDemandServiceImpl implements SauceOnDemandService {
     }
 
 
-    protected String executeCommand(String url) throws JSONException, IOException {
+    protected String executeCommand(String url) throws IOException {
         HttpClient client = new DefaultHttpClient();
         BasicHttpRequest r = new BasicHttpRequest("GET", url);
         HttpResponse response = client.execute(h, r);

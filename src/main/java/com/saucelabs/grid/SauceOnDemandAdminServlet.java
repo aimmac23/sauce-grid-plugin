@@ -37,13 +37,14 @@ import java.util.logging.Logger;
  */
 public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
 
-    private static final Logger logger = Logger
+	private static final Logger logger = Logger
             .getLogger(SauceOnDemandAdminServlet.class.getName());
+	
+	private static final long serialVersionUID = 1L;
 
     private static final String UPDATE_BROWSERS = "updateSupportedBrowsers";
     public static final String WEB_DRIVER_CAPABILITIES = "webDriverCapabilities";
     public static final String SELENIUM_CAPABILITIES = "seleniumCapabilities";
-    private static final String SAUCE_CONNECT_ENABLED = "sauceConnect";
     private static final String SELENIUM_HOST = "seleniumHost";
     private static final String SELENIUM_PORT = "seleniumPort";
     private SauceOnDemandService service = new SauceOnDemandServiceImpl();

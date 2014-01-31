@@ -63,7 +63,6 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     private static final String URL_FORMAT = "http://{0}:{1}";
     private static final String SELENIUM_HOST = "seleniumHost";
     private static final String SELENIUM_PORT = "seleniumPort";
-    private static URL DEFAULT_SAUCE_CONNECT_URL;
     private static URL SAUCE_ONDEMAND_URL;
 
     private volatile boolean sauceAvailable = false;

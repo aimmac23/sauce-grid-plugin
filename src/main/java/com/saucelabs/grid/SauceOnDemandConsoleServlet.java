@@ -20,8 +20,9 @@ import java.util.List;
  */
 public class SauceOnDemandConsoleServlet extends AbstractSauceOnDemandServlet {
 
+	private static final long serialVersionUID = 1L;
 
-    public SauceOnDemandConsoleServlet(Registry registry) {
+	public SauceOnDemandConsoleServlet(Registry registry) {
         super(registry);
     }
 

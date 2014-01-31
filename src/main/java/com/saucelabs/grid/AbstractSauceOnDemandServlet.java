@@ -22,7 +22,9 @@ import java.util.logging.Logger;
  */
 public abstract class AbstractSauceOnDemandServlet extends RegistryBasedServlet {
 
-    private static final Logger log = Logger.getLogger(AbstractSauceOnDemandServlet.class.getName());
+	private static final long serialVersionUID = 1L;
+
+	private static final Logger log = Logger.getLogger(AbstractSauceOnDemandServlet.class.getName());
 
     private static String coreVersion;
     private static String coreRevision;
