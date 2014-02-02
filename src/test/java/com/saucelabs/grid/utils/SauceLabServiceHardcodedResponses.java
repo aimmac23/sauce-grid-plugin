@@ -1,12 +1,12 @@
 package com.saucelabs.grid.utils;
 
-import org.apache.commons.io.IOUtils;
-import org.json.JSONException;
-import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+
+import org.apache.commons.io.IOUtils;
+
+import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
 
 public class SauceLabServiceHardcodedResponses extends SauceOnDemandServiceImpl {
 
@@ -35,7 +35,7 @@ public class SauceLabServiceHardcodedResponses extends SauceOnDemandServiceImpl 
 
 
   @Override
-  protected String executeCommand(String url) throws JSONException, IOException {
+  protected String executeCommand(String url) throws IOException {
     if (STATUS.equals(url)) {
       return statusRepsonse;
     } else if (BROWSERS.equals(url)) {
