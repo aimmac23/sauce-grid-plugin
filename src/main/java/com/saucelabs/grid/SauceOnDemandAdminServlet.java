@@ -212,11 +212,11 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
         for (SauceOnDemandCapabilities cap : webDriverBrowsers.getAllBrowsers()) {
 
             builder.append("<option value='").append(cap.getMD5()).append('\'');
-
-            if (p.isWebDriverBrowserSelected(cap)) {
-                builder.append(" selected ");
+            
+            if(p.getWebDriverCapabilities().contains(cap.getMD5())) {
+                builder.append(" selected=\"selected\" ");
             }
-
+        
             builder.append(">");
             builder.append(cap);
             builder.append("</option>");
@@ -232,8 +232,16 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
                 .append("' multiple='multiple' class='driverTypes'>");
         for (SauceOnDemandCapabilities cap : seleniumBrowsers.getAllBrowsers()) {
 
-            builder.append("<option value='").append(cap.getMD5()).append("'>");
+            builder.append("<option value='").append(cap.getMD5()).append('\'');
+            
+            if(p.getSeleniumRCCapabilities().contains(cap.getMD5())) {
+                builder.append(" selected=\"selected\"");
+            }
+            
+            builder.append(">");
             builder.append(cap);
+
+            
             builder.append("</option>");
         }
         builder.append("</select>");

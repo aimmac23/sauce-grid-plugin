@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.openqa.grid.common.JSONConfigurationUtils;
 import org.openqa.grid.common.RegistrationRequest;
+import org.openqa.grid.web.servlet.handler.WebDriverRequest;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.saucelabs.grid.BrowsersCache;
@@ -27,8 +28,8 @@ public class SauceLabsConfigurationFile {
 	
     private String userName = null;
     private String accessKey = null;
-	private String sauceLabsHost = null;
-	private String sauceLabsPort = null;
+	private String sauceLabsHost = SauceOnDemandRemoteProxy.SAUCE_DEFAULT_HOST;
+	private String sauceLabsPort = SauceOnDemandRemoteProxy.SAUCE_DEFAULT_PORT;
 	private boolean handleUnspecifiedCapabilities = true;
 	// Is this even a sensible property?
 	private boolean enableSauce = true;
@@ -38,8 +39,8 @@ public class SauceLabsConfigurationFile {
 	public SauceLabsConfigurationFile(JSONObject file) {
 		userName = getNullableProperty(file, SauceOnDemandRemoteProxy.SAUCE_USER_NAME, null);
 		accessKey = getNullableProperty(file, SauceOnDemandRemoteProxy.SAUCE_ACCESS_KEY, null);
-        sauceLabsHost = getNullableProperty(file, SauceOnDemandRemoteProxy.SELENIUM_HOST, null);
-        sauceLabsPort = getNullableProperty(file, SauceOnDemandRemoteProxy.SELENIUM_PORT, null);
+        sauceLabsHost = getNullableProperty(file, SauceOnDemandRemoteProxy.SELENIUM_HOST, SauceOnDemandRemoteProxy.SAUCE_DEFAULT_HOST);
+        sauceLabsPort = getNullableProperty(file, SauceOnDemandRemoteProxy.SELENIUM_PORT, SauceOnDemandRemoteProxy.SAUCE_DEFAULT_PORT);
         
         handleUnspecifiedCapabilities = getNullableProperty(file, 
         		SauceOnDemandRemoteProxy.SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES, Boolean.TRUE);
@@ -47,7 +48,7 @@ public class SauceLabsConfigurationFile {
 		enableSauce = getNullableProperty(file, SauceOnDemandRemoteProxy.SAUCE_ENABLE, Boolean.TRUE);
 
         webdriverBrowserHashes = parseBrowserArray(file, SauceOnDemandRemoteProxy.SAUCE_WEB_DRIVER_CAPABILITIES);
-        webdriverBrowserHashes = parseBrowserArray(file, SauceOnDemandRemoteProxy.SAUCE_RC_CAPABILITIES);
+        seleniumRCBrowserHashes = parseBrowserArray(file, SauceOnDemandRemoteProxy.SAUCE_RC_CAPABILITIES);
 	}
 	
 	private List<String> parseBrowserArray(JSONObject file, String key) {
@@ -178,6 +179,28 @@ public class SauceLabsConfigurationFile {
 		
 	}
 	
+	public void applySauceLabsCredentials(WebDriverRequest request) {
+    	String body = request.getBody();
+        //convert from String to JSON
+        try {
+            JSONObject json = new JSONObject(body);
+            //add username/accessKey
+            JSONObject desiredCapabilities = json.getJSONObject("desiredCapabilities");
+            if(desiredCapabilities.opt("username") == null) {
+                desiredCapabilities.put("username", this.userName);
+            }
+            if(desiredCapabilities.opt("accessKey") == null) {
+            	desiredCapabilities.put("accessKey", this.accessKey);	
+            }
+            
+            //convert from JSON to String
+            request.setBody(json.toString());
+            log.log(Level.INFO, "Updating desired capabilities : " + desiredCapabilities);
+        } catch (JSONException e) {
+            log.log(Level.SEVERE, "Error parsing JSON", e);
+        }
+	}
+	
 	public boolean isAuthenticationDetailsValid() {
 		return userName != null && accessKey != null;
 	}
@@ -189,7 +212,60 @@ public class SauceLabsConfigurationFile {
 	public String getAccessKey() {
 		return accessKey;
 	}
-
 	
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	
+	public void setAccessKey(String accessKey) {
+		this.accessKey = accessKey;
+	}
+
+	public String getSauceLabsHost() {
+		return sauceLabsHost;
+	}
+	
+	public String getSauceLabsPort() {
+		return sauceLabsPort;
+	}
+	
+	public void setSauceLabsHost(String sauceLabsHost) {
+		this.sauceLabsHost = sauceLabsHost;
+	}
+	
+	public void setSauceLabsPort(String sauceLabsPort) {
+		this.sauceLabsPort = sauceLabsPort;
+	}
+	
+	public void setSeleniumRCBrowserHashes(List<String> seleniumRCBrowserHashes) {
+		this.seleniumRCBrowserHashes = seleniumRCBrowserHashes;
+	}
+	
+	public void setWebdriverBrowserHashes(List<String> webdriverBrowserHashes) {
+		this.webdriverBrowserHashes = webdriverBrowserHashes;
+	}
+	
+	public List<String> getSeleniumRCBrowserHashes() {
+		return seleniumRCBrowserHashes;
+	}
+	
+	public List<String> getWebdriverBrowserHashes() {
+		return webdriverBrowserHashes;
+	}
+	
+	public void setHandleUnspecifiedCapabilities(
+			boolean handleUnspecifiedCapabilities) {
+		this.handleUnspecifiedCapabilities = handleUnspecifiedCapabilities;
+	}
+	public boolean isHandleUnspecifiedCapabilities() {
+		return handleUnspecifiedCapabilities;
+	}
+	public void setEnableSauce(boolean enableSauce) {
+		this.enableSauce = enableSauce;
+	}
+	
+	public boolean isEnableSauce() {
+		return enableSauce;
+	}
 
 }
