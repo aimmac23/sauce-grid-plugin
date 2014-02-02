@@ -358,6 +358,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
             jsonObject.put(SAUCE_ACCESS_KEY, getAccessKey());
             jsonObject.put(SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES, shouldHandleUnspecifiedCapabilities());
             jsonObject.put(SAUCE_WEB_DRIVER_CAPABILITIES, getWebDriverCapabilities());
+            jsonObject.put(SAUCE_RC_CAPABILITIES, getSeleniumCapabilities());
             jsonObject.put(SELENIUM_HOST, getSeleniumHost());
             jsonObject.put(SELENIUM_PORT, getSeleniumPort());
             //TODO handle selected browsers
@@ -493,6 +494,10 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     public void setSeleniumCapabilities(String[] seleniumCapabilities) {
         this.seleniumCapabilities = seleniumCapabilities;
     }
+    
+     public String[] getSeleniumCapabilities() {
+		return seleniumCapabilities;
+	}
 
     public boolean isWebDriverBrowserSelected(SauceOnDemandCapabilities cap) {
         if (webDriverCapabilities != null) {
