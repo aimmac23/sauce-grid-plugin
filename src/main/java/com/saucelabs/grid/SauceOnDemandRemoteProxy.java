@@ -1,5 +1,6 @@
 package com.saucelabs.grid;
 
+import com.saucelabs.grid.internal.SauceLabsConfigurationFile;
 import com.saucelabs.grid.services.SauceOnDemandRestAPIException;
 import com.saucelabs.grid.services.SauceOnDemandService;
 import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
@@ -61,8 +62,8 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     public static final String SAUCE_RC_CAPABILITIES = "sauceSeleniumRCCapabilities";
     public static final String SAUCE_REQUEST_ALLOWED = "isSauceRequestAllowed";
     private static final String URL_FORMAT = "http://{0}:{1}";
-    private static final String SELENIUM_HOST = "seleniumHost";
-    private static final String SELENIUM_PORT = "seleniumPort";
+    public static final String SELENIUM_HOST = "seleniumHost";
+    public static final String SELENIUM_PORT = "seleniumPort";
     private static URL SAUCE_ONDEMAND_URL;
 
     private volatile boolean sauceAvailable = false;
@@ -75,6 +76,7 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     private String[] webDriverCapabilities;
     private String[] seleniumCapabilities;
     private final SauceHttpClientFactory httpClientFactory;
+    
 
 
     static {
@@ -164,79 +166,32 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     }
 
     private static RegistrationRequest updateDesiredCapabilities(RegistrationRequest request) {
-        JSONObject sauceConfiguration = readConfigurationFromFile();
-        try {
-            if (sauceConfiguration != null) {
-                if (sauceConfiguration.has(SELENIUM_HOST)) {
-                    request.getConfiguration().put(SELENIUM_HOST, sauceConfiguration.getString(SELENIUM_HOST));
-                }
-                if (sauceConfiguration.has(SELENIUM_PORT)) {
-                    request.getConfiguration().put(SELENIUM_PORT, sauceConfiguration.getString(SELENIUM_PORT));
-                }
-                if (sauceConfiguration.has(SAUCE_USER_NAME)) {
-                    request.getConfiguration().put(SAUCE_USER_NAME, sauceConfiguration.getString(SAUCE_USER_NAME));
-                }
-                if (sauceConfiguration.has(SAUCE_ACCESS_KEY)) {
-                    request.getConfiguration().put(SAUCE_ACCESS_KEY, sauceConfiguration.getString(SAUCE_ACCESS_KEY));
-                }
-                if (sauceConfiguration.has(SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES)) {
-                    request.getConfiguration().put(SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES, sauceConfiguration.getString(SAUCE_HANDLE_UNSPECIFIED_CAPABILITIES));
-                }
-                if (sauceConfiguration.has(SAUCE_ENABLE)) {
-                    request.getConfiguration().put(SAUCE_ENABLE, sauceConfiguration.getString(SAUCE_ENABLE));
-                }
+    	
+    	SauceLabsConfigurationFile configFile = SauceLabsConfigurationFile.readConfigFile();
+    	
+    	
+    	int concurrencyLevel = 5;
+    	if(configFile.isAuthenticationDetailsValid()) {
+    		try {
+				concurrencyLevel = service.getMaxiumumSessions(configFile.getUserName(), configFile.getAccessKey());
+			} catch (SauceOnDemandRestAPIException e) {
+				logger.info("Couldn't determine SauceLabs concurrency level. Check that "
+						+ "the authenication details are correct, and SauceLabs is up.");
+			}
+    	}
+    	
+    	configFile.updateRegistrationRequest(request, new Integer(concurrencyLevel));
 
-                List<SauceOnDemandCapabilities> caps = new ArrayList<SauceOnDemandCapabilities>();
-                if (sauceConfiguration.has(SAUCE_WEB_DRIVER_CAPABILITIES)) {
-                    request.getCapabilities().clear();
-                    BrowsersCache webDriverBrowsers = new BrowsersCache(service.getWebDriverBrowsers());
-
-                    JSONArray keyArray = sauceConfiguration.getJSONArray(SAUCE_WEB_DRIVER_CAPABILITIES);
-                    for (int i = 0; i < keyArray.length(); i++) {
-                        SauceOnDemandCapabilities sauceOnDemandCapabilities = webDriverBrowsers.get(keyArray.getString(i));
-                        if (sauceOnDemandCapabilities != null) {
-                            caps.add(sauceOnDemandCapabilities);
-                        }
-
-                    }
-                }
-                if (sauceConfiguration.has(SAUCE_RC_CAPABILITIES)) {
-                    request.getCapabilities().clear();
-                    BrowsersCache seleniumBrowsers = new BrowsersCache(service.getSeleniumBrowsers());
-
-                    JSONArray keyArray = sauceConfiguration.getJSONArray(SAUCE_RC_CAPABILITIES);
-                    for (int i = 0; i < keyArray.length(); i++) {
-                        SauceOnDemandCapabilities sauceOnDemandCapabilities = seleniumBrowsers.get(keyArray.getString(i));
-                        if (sauceOnDemandCapabilities != null) {
-                            caps.add(sauceOnDemandCapabilities);
-                        }
-                    }
-                }
-
-                int maxiumumSessions = service.getMaxiumumSessions(
-                        sauceConfiguration.getString(SAUCE_USER_NAME),
-                        sauceConfiguration.getString(SAUCE_ACCESS_KEY));
-                if (maxiumumSessions == -1) {
-                    maxiumumSessions = 20;
-                }
-                if (caps.isEmpty()) {
-                    for (DesiredCapabilities capability : request.getCapabilities()) {
-                        capability.setCapability(RegistrationRequest.MAX_INSTANCES, maxiumumSessions);
-                    }
-                } else {
-                    for (SauceOnDemandCapabilities cap : caps) {
-                        DesiredCapabilities c = new DesiredCapabilities(cap.asMap());
-                        c.setCapability(RegistrationRequest.MAX_INSTANCES, maxiumumSessions);
-                        request.getCapabilities().add(c);
-                    }
-                }
-            }
-        } catch (JSONException e) {
-            logger.log(Level.SEVERE, "Error parsing JSON", e);
-        } catch (SauceOnDemandRestAPIException e) {
-            logger.log(Level.SEVERE, "Error invoking Sauce REST API", e);
-        }
-        return request;
+    	try {
+    		BrowsersCache webDriverBrowsers = new BrowsersCache(service.getWebDriverBrowsers());
+        	BrowsersCache seleniumRCBrowsers = new BrowsersCache(service.getSeleniumBrowsers());
+        	configFile.updateRegistrationRequestBrowsers(request, webDriverBrowsers, seleniumRCBrowsers, concurrencyLevel);
+            	
+    	} catch(SauceOnDemandRestAPIException e) {
+    		logger.log(Level.SEVERE, "Could not retrieve browser list from SauceLabs", e);
+    	}
+    	
+    	return request;
     }
 
     public static JSONObject readConfigurationFromFile() {
