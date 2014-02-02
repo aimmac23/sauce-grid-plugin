@@ -341,16 +341,16 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 		return true;
 	}
 
-    public void setWebDriverCapabilities(String[] webDriverCapabilities) {
-        configFile.setWebdriverBrowserHashes(Arrays.asList(webDriverCapabilities));
+    public void setWebDriverCapabilities(List<String> webDriverCapabilities) {
+        configFile.setWebdriverBrowserHashes(webDriverCapabilities);
     }
 
     public List<String> getWebDriverCapabilities() {
         return configFile.getWebdriverBrowserHashes();
     }
 
-    public void setSeleniumCapabilities(String[] seleniumCapabilities) {
-        configFile.setSeleniumRCBrowserHashes(Arrays.asList(seleniumCapabilities));
+    public void setSeleniumCapabilities(List<String> seleniumCapabilities) {
+        configFile.setSeleniumRCBrowserHashes(seleniumCapabilities);
     }
     
      public List<String> getSeleniumRCCapabilities() {

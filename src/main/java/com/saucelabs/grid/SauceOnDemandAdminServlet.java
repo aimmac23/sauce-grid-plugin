@@ -23,6 +23,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -292,10 +295,15 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
         }
         sauceRequest.getConfiguration().put(RegistrationRequest.MAX_SESSION,
                 maxSauceSessions);
-        String[] webDriverCapabilities = req
-                .getParameterValues(WEB_DRIVER_CAPABILITIES);
-        String[] seleniumRCCapabilities = req
-                .getParameterValues(SELENIUM_CAPABILITIES);
+        List<String> webDriverCapabilities = new ArrayList<String>();
+        if(req.getParameterValues(WEB_DRIVER_CAPABILITIES) != null) {
+        	webDriverCapabilities.addAll(Arrays.asList(req.getParameterValues(WEB_DRIVER_CAPABILITIES)));
+        };
+        List<String> seleniumRCCapabilities = new ArrayList<String>();
+        if(req.getParameterValues(SELENIUM_CAPABILITIES) != null) {
+        	seleniumRCCapabilities.addAll(Arrays.asList(req.getParameterValues(SELENIUM_CAPABILITIES)));
+
+        };
         // write selected browsers/auth details to sauce-ondemand.json
         proxy.setUserName(userName);
         proxy.setAccessKey(accessKey);
