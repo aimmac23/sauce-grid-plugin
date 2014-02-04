@@ -25,7 +25,6 @@
             <version>2.39.0</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>com.saucelabs</groupId>
             <artifactId>saucerest</artifactId>

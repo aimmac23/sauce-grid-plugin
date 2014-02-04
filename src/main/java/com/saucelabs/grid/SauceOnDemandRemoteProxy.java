@@ -2,9 +2,14 @@ package com.saucelabs.grid;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -14,7 +19,12 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
+
 import org.openqa.grid.common.RegistrationRequest;
+import org.openqa.grid.common.SeleniumProtocol;
 import org.openqa.grid.internal.Registry;
 import org.openqa.grid.internal.RemoteProxy;
 import org.openqa.grid.internal.TestSession;
@@ -27,6 +37,8 @@ import org.openqa.grid.web.servlet.handler.WebDriverRequest;
 import org.openqa.selenium.remote.internal.HttpClientFactory;
 
 import com.saucelabs.grid.internal.SauceLabsConfigurationFile;
+import com.saucelabs.grid.internal.TestSlotCapabilityInterceptor;
+import com.saucelabs.grid.internal.TestSlotWithMinimalConstructor;
 import com.saucelabs.grid.services.SauceOnDemandRestAPIException;
 import com.saucelabs.grid.services.SauceOnDemandService;
 import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
@@ -66,7 +78,9 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
     private final SauceHttpClientFactory httpClientFactory;
     
     SauceLabsConfigurationFile configFile;
-
+    
+    // proxies for the real TestSlot objects, to make the TestSlots change capabilities when in use
+    protected List<TestSlot> testSlotProxies = new ArrayList<TestSlot>();
 
     static {
         try {
@@ -103,7 +117,12 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
         } catch (SauceOnDemandRestAPIException e) {
             logger.log(Level.SEVERE, "Error invoking Sauce REST API", e);
         }
-
+        
+        if(configFile.isHandleUnspecifiedCapabilities()) {
+            for(TestSlot original : super.getTestSlots()) {
+            	testSlotProxies.add(createCGLibTestSlotProxy(original));
+            }
+        }
     }
 
     private static RegistrationRequest updateDesiredCapabilities(RegistrationRequest request) {
@@ -375,5 +394,22 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     public void setSeleniumPort(String seleniumPort) {
         this.configFile.setSauceLabsPort(seleniumPort);
+    }
+    
+    @Override
+    public List<TestSlot> getTestSlots() {
+    	if(testSlotProxies.isEmpty()) {
+    		super.getTestSlots();
+    	}
+    	// otherwise we want to re-map the capabilities when in use
+    	return Collections.unmodifiableList(testSlotProxies);
+    }
+    
+    private TestSlot createCGLibTestSlotProxy(TestSlot original) {
+        Enhancer enhancer = new Enhancer();
+        enhancer.setSuperclass(TestSlotWithMinimalConstructor.class);
+        enhancer.setCallback(new TestSlotCapabilityInterceptor(original));
+        
+        return (TestSlot) enhancer.create(new Class[] {RemoteProxy.class}, new Object[] {this});
     }
 }

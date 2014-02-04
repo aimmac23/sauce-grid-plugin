@@ -1,7 +1,5 @@
 package com.saucelabs.grid;
 
-import com.saucelabs.grid.SauceOnDemandRemoteProxy;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.grid.common.GridRole;
