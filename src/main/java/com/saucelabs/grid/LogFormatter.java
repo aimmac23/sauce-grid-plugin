@@ -23,6 +23,9 @@ public class LogFormatter extends Formatter {
         builder.append('[').append(record.getLevel()).append("] - ");
         builder.append(formatMessage(record));
         builder.append("\n");
+        if(record.getThrown() != null) {
+        	record.getThrown().printStackTrace();
+        }
         return builder.toString();
     }
 }
