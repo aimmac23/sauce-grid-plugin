@@ -166,9 +166,20 @@ public class SauceLabsConfigurationFile {
 		return toReturn;
 	}
 	
+	protected void updateRegistrationForHandleUnspecified(RegistrationRequest request, int maximumSessions) {
+		request.getCapabilities().clear();
+		
+		DesiredCapabilities genericCapability = new DesiredCapabilities();
+		genericCapability.setBrowserName("generic");
+		genericCapability.setCapability(RegistrationRequest.MAX_INSTANCES, maximumSessions);
+		
+		request.addDesiredCapability(genericCapability);
+	}
+	
 	public void updateRegistrationRequestBrowsers(RegistrationRequest request, 
 			BrowsersCache webDriverBrowsers, BrowsersCache seleniumRCBrowsers, int maximumSessions) {
-		if(webdriverBrowserHashes.isEmpty() && seleniumRCBrowserHashes.isEmpty()) {
+		if((webdriverBrowserHashes.isEmpty() && seleniumRCBrowserHashes.isEmpty()) || handleUnspecifiedCapabilities) {
+			updateRegistrationForHandleUnspecified(request, maximumSessions);
 			return;
 		}
 		

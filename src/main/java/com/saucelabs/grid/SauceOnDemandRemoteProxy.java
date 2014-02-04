@@ -1,14 +1,19 @@
 package com.saucelabs.grid;
 
-import com.saucelabs.grid.internal.SauceLabsConfigurationFile;
-import com.saucelabs.grid.services.SauceOnDemandRestAPIException;
-import com.saucelabs.grid.services.SauceOnDemandService;
-import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.openqa.grid.common.JSONConfigurationUtils;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.openqa.grid.common.RegistrationRequest;
 import org.openqa.grid.internal.Registry;
 import org.openqa.grid.internal.RemoteProxy;
@@ -19,26 +24,12 @@ import org.openqa.grid.internal.utils.HtmlRenderer;
 import org.openqa.grid.selenium.proxy.DefaultRemoteProxy;
 import org.openqa.grid.web.servlet.handler.RequestType;
 import org.openqa.grid.web.servlet.handler.WebDriverRequest;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.internal.HttpClientFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
+import com.saucelabs.grid.internal.SauceLabsConfigurationFile;
+import com.saucelabs.grid.services.SauceOnDemandRestAPIException;
+import com.saucelabs.grid.services.SauceOnDemandService;
+import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
 
 /**
  * This proxy instance is designed to forward requests to Sauce OnDemand.  Requests will be forwarded to Sauce OnDemand
@@ -192,7 +183,6 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
             else {
             	logger.log(Level.INFO, "No session created for request: " + requestedCapability);
             }
-            
             return session;
         } else {
             return null;

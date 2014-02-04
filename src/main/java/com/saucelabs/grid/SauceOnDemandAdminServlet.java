@@ -103,7 +103,7 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
             }
         };
 
-        Executors.newSingleThreadScheduledExecutor().schedule(selfRegister, 20,
+        Executors.newSingleThreadScheduledExecutor().schedule(selfRegister, 10,
                 TimeUnit.SECONDS);
     }
 
@@ -316,7 +316,8 @@ public class SauceOnDemandAdminServlet extends AbstractSauceOnDemandServlet {
 
         sauceRequest.getConfiguration().put(RegistrationRequest.MAX_SESSION,
                 maxSauceSessions);
-        if (webDriverCapabilities == null && handleUnspecified) {
+        
+        if (handleUnspecified) {
             // create dummy desired capabilitiy to ensure that test slots get
             // created
             DesiredCapabilities c = DesiredCapabilities.firefox();
