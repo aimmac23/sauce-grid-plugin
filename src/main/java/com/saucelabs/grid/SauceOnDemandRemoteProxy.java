@@ -2,14 +2,11 @@ package com.saucelabs.grid;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -20,11 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
 
 import org.openqa.grid.common.RegistrationRequest;
-import org.openqa.grid.common.SeleniumProtocol;
 import org.openqa.grid.internal.Registry;
 import org.openqa.grid.internal.RemoteProxy;
 import org.openqa.grid.internal.TestSession;
@@ -394,6 +388,16 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     public void setSeleniumPort(String seleniumPort) {
         this.configFile.setSauceLabsPort(seleniumPort);
+    }
+    
+    @Override
+    public void startPolling() {
+    	// do not use the polling mechanism in the parent class - we have our own mechanism
+    }
+    
+    @Override
+    public void stopPolling() {
+    	// do not use the polling mechanism in the parent class - we have our own mechanism
     }
     
     @Override
