@@ -19,13 +19,14 @@ import javax.servlet.http.HttpServletResponse;
 import net.sf.cglib.proxy.Enhancer;
 
 import org.openqa.grid.common.RegistrationRequest;
+import org.openqa.grid.internal.BaseRemoteProxy;
 import org.openqa.grid.internal.Registry;
 import org.openqa.grid.internal.RemoteProxy;
 import org.openqa.grid.internal.TestSession;
 import org.openqa.grid.internal.TestSlot;
+import org.openqa.grid.internal.listeners.CommandListener;
 import org.openqa.grid.internal.utils.CapabilityMatcher;
 import org.openqa.grid.internal.utils.HtmlRenderer;
-import org.openqa.grid.selenium.proxy.DefaultRemoteProxy;
 import org.openqa.grid.web.servlet.handler.RequestType;
 import org.openqa.grid.web.servlet.handler.WebDriverRequest;
 import org.openqa.selenium.remote.internal.HttpClientFactory;
@@ -45,7 +46,7 @@ import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
  * @author Franois Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionality
  */
-public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
+public class SauceOnDemandRemoteProxy extends BaseRemoteProxy implements CommandListener {
 
     private static final Logger logger = Logger.getLogger(SauceOnDemandRemoteProxy.class.getName());
     private static final SauceOnDemandService service = new SauceOnDemandServiceImpl();
@@ -296,7 +297,6 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     @Override
     public void afterCommand(TestSession session, HttpServletRequest request, HttpServletResponse response) {
-        super.afterCommand(session, request, response);
         logger.log(Level.INFO, "Finished executing " + request.toString());
     }
 
@@ -310,7 +310,6 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
             	configFile.applySauceLabsCredentials(seleniumRequest);
             }
         }
-        super.beforeCommand(session, request, response);
     }
 
     @Override
@@ -388,16 +387,6 @@ public class SauceOnDemandRemoteProxy extends DefaultRemoteProxy {
 
     public void setSeleniumPort(String seleniumPort) {
         this.configFile.setSauceLabsPort(seleniumPort);
-    }
-    
-    @Override
-    public void startPolling() {
-    	// do not use the polling mechanism in the parent class - we have our own mechanism
-    }
-    
-    @Override
-    public void stopPolling() {
-    	// do not use the polling mechanism in the parent class - we have our own mechanism
     }
     
     @Override
