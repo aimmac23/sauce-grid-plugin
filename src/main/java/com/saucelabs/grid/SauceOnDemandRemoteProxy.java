@@ -63,6 +63,7 @@ public class SauceOnDemandRemoteProxy extends BaseRemoteProxy implements Command
     public static final String SAUCE_WEB_DRIVER_CAPABILITIES = "sauceWebDriverCapabilities";
     public static final String SAUCE_RC_CAPABILITIES = "sauceSeleniumRCCapabilities";
     public static final String SAUCE_REQUEST_ALLOWED = "isSauceRequestAllowed";
+    public static final String SAUCE_ADDITIONAL_CAPABILITIES = "sauceAdditionalCapabilities";
     private static final String URL_FORMAT = "http://{0}:{1}";
     public static final String SELENIUM_HOST = "seleniumHost";
     public static final String SELENIUM_PORT = "seleniumPort";

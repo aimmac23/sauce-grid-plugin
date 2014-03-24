@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -34,7 +36,9 @@ public class SauceLabsConfigurationFile {
 	// Is this even a sensible property?
 	private boolean enableSauce = true;
 	List<String> webdriverBrowserHashes = new ArrayList<String>();
-	List<String> seleniumRCBrowserHashes = new ArrayList<String>();;
+	List<String> seleniumRCBrowserHashes = new ArrayList<String>();
+	
+	Map<String, Object> sauceAdditionalCapabilities = new HashMap<String, Object>();
 	
 	public SauceLabsConfigurationFile(JSONObject file) {
 		userName = getNullableProperty(file, SauceOnDemandRemoteProxy.SAUCE_USER_NAME, null);
@@ -49,6 +53,26 @@ public class SauceLabsConfigurationFile {
 
         webdriverBrowserHashes = parseBrowserArray(file, SauceOnDemandRemoteProxy.SAUCE_WEB_DRIVER_CAPABILITIES);
         seleniumRCBrowserHashes = parseBrowserArray(file, SauceOnDemandRemoteProxy.SAUCE_RC_CAPABILITIES);
+        
+        sauceAdditionalCapabilities = parseAdditionalCapabilities(file);
+	}
+	
+	private Map<String, Object> parseAdditionalCapabilities(JSONObject file) {
+		Map<String, Object> additionalCapabilities = new HashMap<String, Object>();
+		
+        JSONObject propertiesObject = getNullableProperty(file, SauceOnDemandRemoteProxy.SAUCE_ADDITIONAL_CAPABILITIES, new JSONObject());
+        Iterator<?> it = propertiesObject.keys();
+        while(it.hasNext()) {
+        	Object propertyKey = it.next();
+        	try {
+				Object propertyValue = propertiesObject.get((String)propertyKey);
+				additionalCapabilities.put((String) propertyKey, propertyValue);
+			} catch (JSONException e) {
+				log.warning("Couldn't read key/value pair for additional property: " + propertyKey);
+			}
+        }
+        
+        return additionalCapabilities;
 	}
 	
 	private List<String> parseBrowserArray(JSONObject file, String key) {
@@ -117,6 +141,7 @@ public class SauceLabsConfigurationFile {
             jsonObject.put(SauceOnDemandRemoteProxy.SELENIUM_HOST, sauceLabsHost);
             jsonObject.put(SauceOnDemandRemoteProxy.SELENIUM_PORT, sauceLabsPort);
             jsonObject.put(SauceOnDemandRemoteProxy.SAUCE_ENABLE, enableSauce);
+            jsonObject.put(SauceOnDemandRemoteProxy.SAUCE_ADDITIONAL_CAPABILITIES, sauceAdditionalCapabilities);
             
             FileWriter file = new FileWriter(SauceOnDemandRemoteProxy.SAUCE_ONDEMAND_CONFIG_FILE);
             file.write(jsonObject.toString());
@@ -160,10 +185,20 @@ public class SauceLabsConfigurationFile {
 			SauceOnDemandCapabilities browser = browserCache.get(driverHash);
 			DesiredCapabilities capabilities = new DesiredCapabilities(browser.asMap());
 			capabilities.setCapability(RegistrationRequest.MAX_INSTANCES, maximumSessions);
+			
+			// in case we wish to tag the Saucelabs instance, for custom capability matchers
+			applyExtraCapabilities(capabilities);
+			
 			toReturn.add(capabilities);
 		}
 		
 		return toReturn;
+	}
+	
+	private void applyExtraCapabilities(DesiredCapabilities capabilities) {
+		for(String key : sauceAdditionalCapabilities.keySet()) {
+			capabilities.setCapability(key, sauceAdditionalCapabilities.get(key));
+		}
 	}
 	
 	protected void updateRegistrationForHandleUnspecified(RegistrationRequest request, int maximumSessions) {
@@ -172,6 +207,9 @@ public class SauceLabsConfigurationFile {
 		DesiredCapabilities genericCapability = new DesiredCapabilities();
 		genericCapability.setBrowserName("generic");
 		genericCapability.setCapability(RegistrationRequest.MAX_INSTANCES, maximumSessions);
+		
+		// in case we wish to tag the Saucelabs instance, for custom capability matchers
+		applyExtraCapabilities(genericCapability);
 		
 		request.addDesiredCapability(genericCapability);
 	}
