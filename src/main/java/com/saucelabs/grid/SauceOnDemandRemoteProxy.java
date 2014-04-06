@@ -25,6 +25,7 @@ import org.openqa.grid.internal.RemoteProxy;
 import org.openqa.grid.internal.TestSession;
 import org.openqa.grid.internal.TestSlot;
 import org.openqa.grid.internal.listeners.CommandListener;
+import org.openqa.grid.internal.listeners.TimeoutListener;
 import org.openqa.grid.internal.utils.CapabilityMatcher;
 import org.openqa.grid.internal.utils.HtmlRenderer;
 import org.openqa.grid.web.servlet.handler.RequestType;
@@ -46,7 +47,7 @@ import com.saucelabs.grid.services.SauceOnDemandServiceImpl;
  * @author Franois Reynaud - Initial version of plugin
  * @author Ross Rowe - Additional functionality
  */
-public class SauceOnDemandRemoteProxy extends BaseRemoteProxy implements CommandListener {
+public class SauceOnDemandRemoteProxy extends BaseRemoteProxy implements CommandListener, TimeoutListener {
 
     private static final Logger logger = Logger.getLogger(SauceOnDemandRemoteProxy.class.getName());
     private static final SauceOnDemandService service = new SauceOnDemandServiceImpl();
@@ -406,4 +407,20 @@ public class SauceOnDemandRemoteProxy extends BaseRemoteProxy implements Command
         
         return (TestSlot) enhancer.create(new Class[] {RemoteProxy.class}, new Object[] {this});
     }
+
+	@Override
+	public void beforeRelease(TestSession session) {
+		// XXX: Implementation copy-pasted from DefaultRemoteProxy - is this correct for us?
+	    // release the resources remotely.
+	    if (session.getExternalKey() == null) {
+	      throw new IllegalStateException(
+	          "cannot release the resources, they haven't been reserved properly.");
+	    }
+	    boolean ok = session.sendDeleteSessionRequest();
+	    if (!ok) {
+	      logger.warning("Error releasing the resources on timeout for session " + session 
+	    		  + " -  session already timed out on remote node?");
+	    }
+		
+	}
 }
