@@ -11,10 +11,11 @@ import java.util.concurrent.TimeUnit;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.message.BasicHttpRequest;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.openqa.selenium.remote.internal.HttpClientFactory;
 
 import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
@@ -43,10 +44,12 @@ public class SauceOnDemandServiceImpl implements SauceOnDemandService {
     private static final String SELENIUM_BROWSERS = BROWSERS + "/selenium-rc";
     private static final String WEB_DRIVER_BROWSERS = BROWSERS + "/webdriver";
 	private LoadingCache<String, Boolean> sauceStatusCache;
+	private final HttpClient client;
 
 
     public SauceOnDemandServiceImpl() {
     	sauceStatusCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build(new SauceStatusLoader());
+    	client = new HttpClientFactory().getHttpClient();
     }
 
     /**
@@ -106,15 +109,20 @@ public class SauceOnDemandServiceImpl implements SauceOnDemandService {
 
 
     protected String executeCommand(String url) throws IOException {
-        HttpClient client = new DefaultHttpClient();
-        BasicHttpRequest r = new BasicHttpRequest("GET", url);
-        HttpResponse response = client.execute(h, r);
-        if (response.getStatusLine().getStatusCode() == 200) {
-            String result = Helper.extractResponse(response);
-            return result;
-        } else {
-            throw new RuntimeException("failed to execute " + url + " on " + host + " - " + response.getStatusLine());
+        HttpGet r = new HttpGet(url);
+        try {
+            HttpResponse response = client.execute(h, r);
+            if (response.getStatusLine().getStatusCode() == 200) {
+                String result = Helper.extractResponse(response);
+                return result;
+            } else {
+                throw new RuntimeException("failed to execute " + url + " on " + host + " - " + response.getStatusLine());
+            }    
         }
+        finally {
+            r.releaseConnection();
+        }
+        
     }
     
     private class SauceStatusLoader extends CacheLoader<String, Boolean> {
